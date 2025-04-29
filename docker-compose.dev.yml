@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=payment
+    restart: always
+
+  # Additional payment gateway mock services can be added here
