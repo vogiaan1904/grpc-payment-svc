@@ -25,6 +25,12 @@ const (
 	PaymentMethodCrypto       PaymentMethod = "CRYPTO"
 )
 
+type GatewayType string
+
+const (
+	GatewayTypeZalopay GatewayType = "zalopay"
+)
+
 type Payment struct {
 	ID               primitive.ObjectID `bson:"_id,omitempty"`
 	OrderID          string             `bson:"order_id"`

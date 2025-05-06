@@ -1,68 +1,50 @@
 package config
 
 import (
-	"encoding/json"
-	"os"
+	"strings"
+
+	"github.com/caarlos0/env/v9"
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Log struct {
-		Level        string   `json:"level"`
-		Encoding     string   `json:"encoding"`
-		Mode         string   `json:"mode"`
-		RedactFields []string `json:"redact_fields"`
-	} `json:"log"`
-	Mongo struct {
-		DatabaseUri  string `json:"database_uri"`
-		DatabaseName string `json:"database_name"`
-	} `json:"mongo"`
-	Grpc struct {
-		OrderSvcAddr string `json:"order_svc_addr"`
-	} `json:"grpc"`
+	Log            LogConfig
+	PaymentGateway PaymentGatewayConfig
+	Grpc           GrpcMicroserviceConfig
 }
 
-func Load() (Config, error) {
-	var cfg Config
+type LogConfig struct {
+	Level        string   `env:"LOG_LEVEL" envDefault:"debug"`
+	Encoding     string   `env:"LOG_ENCODING" envDefault:"development"`
+	Mode         string   `env:"LOG_MODE" envDefault:"console"`
+	RedactFields []string `env:"LOG_REDACT_FIELDS" envDefault:"password,token,secret"`
+}
 
-	// Set defaults
-	cfg.Log.Level = "info"
-	cfg.Log.Encoding = "json"
-	cfg.Log.Mode = "production"
-	cfg.Mongo.DatabaseUri = "mongodb://localhost:27017"
-	cfg.Mongo.DatabaseName = "payment"
-	cfg.Grpc.OrderSvcAddr = "localhost:50054"
+type PaymentGatewayConfig struct {
+	Zalopay ZalopayConfig
+}
 
-	// Load from environment variables if present
-	if mongoUri := os.Getenv("MONGO_URI"); mongoUri != "" {
-		cfg.Mongo.DatabaseUri = mongoUri
-	}
-	if dbName := os.Getenv("MONGO_DB_NAME"); dbName != "" {
-		cfg.Mongo.DatabaseName = dbName
-	}
-	if orderSvcAddr := os.Getenv("ORDER_SVC_ADDR"); orderSvcAddr != "" {
-		cfg.Grpc.OrderSvcAddr = orderSvcAddr
-	}
-	if logLevel := os.Getenv("LOG_LEVEL"); logLevel != "" {
-		cfg.Log.Level = logLevel
-	}
-	if logEncoding := os.Getenv("LOG_ENCODING"); logEncoding != "" {
-		cfg.Log.Encoding = logEncoding
-	}
-	if logMode := os.Getenv("LOG_MODE"); logMode != "" {
-		cfg.Log.Mode = logMode
+type ZalopayConfig struct {
+	AppID int    `env:"ZALOPAY_APP_ID" envDefault:"1234567890"`
+	Key1  string `env:"ZALOPAY_KEY1" envDefault:"1234567890"`
+	Key2  string `env:"ZALOPAY_KEY2" envDefault:"1234567890"`
+}
+
+type GrpcMicroserviceConfig struct {
+	OrderSvcAddr string `env:"ORDER_SERVICE_ADDRESS" envDefault:"localhost:50052"`
+}
+
+func Load() (*Config, error) {
+	godotenv.Load()
+	cfg := &Config{}
+	err := env.Parse(cfg)
+	if err != nil {
+		return nil, err
 	}
 
-	// Override with config file if it exists
-	if _, err := os.Stat("config.json"); err == nil {
-		f, err := os.Open("config.json")
-		if err != nil {
-			return cfg, err
-		}
-		defer f.Close()
-
-		if err := json.NewDecoder(f).Decode(&cfg); err != nil {
-			return cfg, err
-		}
+	// Process the LOG_REDACT_FIELDS env var
+	if len(cfg.Log.RedactFields) == 1 && strings.Contains(cfg.Log.RedactFields[0], ",") {
+		cfg.Log.RedactFields = strings.Split(cfg.Log.RedactFields[0], ",")
 	}
 
 	return cfg, nil

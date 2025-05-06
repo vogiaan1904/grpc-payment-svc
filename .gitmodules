@@ -1,0 +1,3 @@
+[submodule "protos"]
+	path = protos
+	url = https://github.com/vogiaan1904/e-commerce-grpc-nest-proto.git

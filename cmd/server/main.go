@@ -8,12 +8,12 @@ import (
 	"syscall"
 
 	"github.com/vogiaan1904/payment-svc/config"
-	"github.com/vogiaan1904/payment-svc/internal/appconfig/mongo"
 	"github.com/vogiaan1904/payment-svc/internal/interceptors"
-	repository "github.com/vogiaan1904/payment-svc/internal/repositories"
+	"github.com/vogiaan1904/payment-svc/internal/models"
 	service "github.com/vogiaan1904/payment-svc/internal/services"
+	pkgGrpc "github.com/vogiaan1904/payment-svc/pkg/grpc"
 	pkgLog "github.com/vogiaan1904/payment-svc/pkg/log"
-	payment "github.com/vogiaan1904/payment-svc/protogen/golang/payment"
+	"github.com/vogiaan1904/payment-svc/protogen/golang/payment"
 	"google.golang.org/grpc"
 )
 
@@ -36,31 +36,37 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	// MongoDB connection
-	mClient, err := mongo.Connect(cfg.Mongo.DatabaseUri)
-	if err != nil {
-		panic(err)
-	}
-	defer mongo.Disconnect(mClient)
-	db := mClient.Database(cfg.Mongo.DatabaseName)
+	gatewayFactory := service.NewPaymentGatewayFactory()
 
-	// Repository and Service initialization
-	paymentRepo := repository.NewPaymentRepository(l, db)
-	paymentSvc := service.NewPaymentService(l, paymentRepo)
+	gatewayFactory.RegisterGateway(models.GatewayTypeZalopay, service.NewZalopayGateway(service.ZalopayConfig{
+		AppID: cfg.PaymentGateway.Zalopay.AppID,
+		Key1:  cfg.PaymentGateway.Zalopay.Key1,
+		Key2:  cfg.PaymentGateway.Zalopay.Key2,
+	}))
+
+	grpcClients, cleanupGrpc, err := pkgGrpc.InitGrpcClients(cfg.Grpc.OrderSvcAddr, l, cfg.Log.RedactFields)
+	if err != nil {
+		log.Fatalf("failed to initialize gRPC clients: %v", err)
+	}
+	defer cleanupGrpc()
+
+	// Create payment service with the factory
+	paymentSvc := service.NewPaymentService(l, gatewayFactory, grpcClients.Order)
 
 	// gRPC server
-	server := grpc.NewServer(
+	sv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(interceptors.ValidationInterceptor, interceptors.ErrorHandlerInterceptor),
 	)
 
-	payment.RegisterPaymentServiceServer(server, paymentSvc)
+	// Register payment service with gRPC server
+	payment.RegisterPaymentServiceServer(sv, paymentSvc)
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
 		log.Printf("Payment gRPC server started on %s", addr)
-		if err := server.Serve(lnr); err != nil {
+		if err := sv.Serve(lnr); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}()
@@ -68,6 +74,6 @@ func main() {
 	<-sigCh
 	log.Println("Shutting down gRPC server...")
 
-	server.GracefulStop()
+	sv.GracefulStop()
 	log.Println("Server stopped")
 }
