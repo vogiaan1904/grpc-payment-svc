@@ -31,7 +31,7 @@ type ZalopayConfig struct {
 }
 
 type GrpcMicroserviceConfig struct {
-	OrderSvcAddr string `env:"ORDER_SERVICE_ADDRESS" envDefault:"localhost:50052"`
+	OrderSvcAddr string `env:"ORDER_SERVICE_ADDRESS" envDefault:"localhost:50054"`
 }
 
 func Load() (*Config, error) {
