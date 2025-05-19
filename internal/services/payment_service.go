@@ -28,87 +28,49 @@ func NewPaymentService(l log.Logger, factory *PaymentGatewayFactory, orderSvc or
 }
 
 func (svc *implPaymentService) ProcessPayment(ctx context.Context, req *payment.ProcessPaymentRequest) (*payment.ProcessPaymentResponse, error) {
-	var o *order.OrderData
-	res, err := svc.orderSvc.FindOne(ctx, &order.FindOneRequest{
-		Id: req.OrderId,
-	})
+	res, err := svc.orderSvc.FindOne(ctx, &order.FindOneRequest{Id: req.OrderId})
 	if err != nil {
-		svc.l.Errorf(ctx, "payment.orderSvc.FindOne: %v", err)
-		return nil, err
+		svc.l.Errorf(ctx, "failed to find order: %v", err)
+		return nil, status.Errorf(codes.Internal, "error retrieving order: %v", err)
 	}
 
-	if res != nil {
-		o = res.Order
+	if res == nil || res.Order == nil {
+		return nil, status.Error(codes.NotFound, "order not found")
 	}
 
-	if o.Status != order.OrderStatus_PENDING {
-		svc.l.Errorf(ctx, "payment.ErrOrderNotPending: %v", ErrOrderNotPending)
+	if res.Order.Status != order.OrderStatus_PENDING {
+		svc.l.Errorf(ctx, "order status validation failed: %v", ErrOrderNotPending)
 		return nil, status.Error(codes.FailedPrecondition, ErrOrderNotPending.Error())
 	}
 
-	gateway, err := svc.gatewayFactory.GetGateway(models.GatewayType(req.GatewayName))
+	gw, err := svc.gatewayFactory.GetGateway(models.GatewayType(req.GatewayName))
 	if err != nil {
-		svc.l.Errorf(ctx, "payment.gatewayFactory.GetGateway: %v", err)
-		return nil, err
+		svc.l.Errorf(ctx, "failed to get payment gateway: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid gateway: %v", err)
 	}
 
-	// Get client IP from metadata if available
-	clientIP := ""
-	if req.Metadata != nil {
-		if ip, ok := req.Metadata["client_ip"]; ok {
-			clientIP = ip
-		}
-	}
-
-	// Get host and return URL from metadata
-	host := ""
-	returnURL := ""
-	if req.Metadata != nil {
-		if h, ok := req.Metadata["host"]; ok {
-			host = h
-		}
-		if url, ok := req.Metadata["return_url"]; ok {
-			returnURL = url
-		}
-	}
-
-	// Process the payment using the selected gateway
-	paymentURL, err := gateway.ProcessPayment(ctx, ProcessPaymentOptions{
-		Ip:          clientIP,
-		Amount:      req.Amount,
-		OrderNumber: req.OrderId,
-		Host:        host,
-		ReturnURL:   returnURL,
-	})
+	pRes, err := gw.ProcessPayment(ctx, req)
 	if err != nil {
-		svc.l.Errorf(ctx, "payment.gateway.ProcessPayment: %v", err)
-		return nil, err
+		svc.l.Errorf(ctx, "payment processing failed: %v", err)
+		return nil, status.Errorf(codes.Internal, "payment processing failed: %v", err)
 	}
 
 	return &payment.ProcessPaymentResponse{
-		PaymentUrl: paymentURL,
+		PaymentUrl: pRes.PaymentUrl,
+		Payment:    pRes.Payment,
 	}, nil
 }
 
 func (svc *implPaymentService) GetPaymentStatus(ctx context.Context, req *payment.GetPaymentStatusRequest) (*payment.GetPaymentStatusResponse, error) {
-	// For demonstration, create a dummy payment data
-	paymentData := &payment.PaymentData{
-		Id:        req.PaymentId,
-		Status:    payment.PaymentStatus_PAYMENT_STATUS_COMPLETED,
-		Method:    payment.PaymentMethod_PAYMENT_METHOD_CREDIT_CARD,
-		Amount:    1000,
-		OrderId:   "order-123",
-		UserId:    "user-123",
-		CreatedAt: "2023-06-01T12:00:00Z",
-		UpdatedAt: "2023-06-01T12:05:00Z",
+	gw, err := svc.gatewayFactory.GetGateway(models.GatewayType(req.GatewayName))
+	if err != nil {
+		svc.l.Errorf(ctx, "failed to get payment gateway: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid gateway: %v", err)
 	}
 
-	return &payment.GetPaymentStatusResponse{
-		Payment: paymentData,
-	}, nil
 }
 
 func (svc *implPaymentService) CancelPayment(ctx context.Context, req *payment.CancelPaymentRequest) (*emptypb.Empty, error) {
-	// For simplicity, just return empty response
+	gw, err := svc.gatewayFactory.GetGateway(models.GatewayType(req.GatewayName))
 	return &emptypb.Empty{}, nil
 }

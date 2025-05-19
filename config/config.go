@@ -28,6 +28,7 @@ type ZalopayConfig struct {
 	AppID int    `env:"ZALOPAY_APP_ID" envDefault:"1234567890"`
 	Key1  string `env:"ZALOPAY_KEY1" envDefault:"1234567890"`
 	Key2  string `env:"ZALOPAY_KEY2" envDefault:"1234567890"`
+	Host  string `env:"NGROK_TEST_URL" envDefault:""`
 }
 
 type GrpcMicroserviceConfig struct {

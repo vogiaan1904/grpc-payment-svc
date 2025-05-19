@@ -11,6 +11,7 @@ import (
 	"github.com/vogiaan1904/payment-svc/internal/interceptors"
 	"github.com/vogiaan1904/payment-svc/internal/models"
 	service "github.com/vogiaan1904/payment-svc/internal/services"
+	zpGW "github.com/vogiaan1904/payment-svc/internal/services/zalopay"
 	pkgGrpc "github.com/vogiaan1904/payment-svc/pkg/grpc"
 	pkgLog "github.com/vogiaan1904/payment-svc/pkg/log"
 	"github.com/vogiaan1904/payment-svc/protogen/golang/payment"
@@ -38,10 +39,11 @@ func main() {
 
 	gatewayFactory := service.NewPaymentGatewayFactory()
 
-	gatewayFactory.RegisterGateway(models.GatewayTypeZalopay, service.NewZalopayGateway(service.ZalopayConfig{
+	gatewayFactory.RegisterGateway(models.GatewayTypeZalopay, zpGW.NewZalopayGateway(zpGW.ZalopayConfig{
 		AppID: cfg.PaymentGateway.Zalopay.AppID,
 		Key1:  cfg.PaymentGateway.Zalopay.Key1,
 		Key2:  cfg.PaymentGateway.Zalopay.Key2,
+		Host:  cfg.PaymentGateway.Zalopay.Host,
 	}))
 
 	grpcClients, cleanupGrpc, err := pkgGrpc.InitGrpcClients(cfg.Grpc.OrderSvcAddr, l, cfg.Log.RedactFields)

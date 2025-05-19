@@ -28,7 +28,7 @@ const (
 type GatewayType string
 
 const (
-	GatewayTypeZalopay GatewayType = "zalopay"
+	GatewayTypeZalopay GatewayType = "ZALOPAY"
 )
 
 type Payment struct {
