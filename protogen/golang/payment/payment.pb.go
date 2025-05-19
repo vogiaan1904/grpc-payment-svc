@@ -408,6 +408,9 @@ func (x *ProcessPaymentResponse) GetPaymentUrl() string {
 type GetPaymentStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PaymentId     string                 `protobuf:"bytes,1,opt,name=payment_id,json=paymentId,proto3" json:"payment_id,omitempty"`
+	OrderId       string                 `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	Method        PaymentMethod          `protobuf:"varint,3,opt,name=method,proto3,enum=payment.PaymentMethod" json:"method,omitempty"`
+	GatewayName   string                 `protobuf:"bytes,4,opt,name=gateway_name,json=gatewayName,proto3" json:"gateway_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -445,6 +448,27 @@ func (*GetPaymentStatusRequest) Descriptor() ([]byte, []int) {
 func (x *GetPaymentStatusRequest) GetPaymentId() string {
 	if x != nil {
 		return x.PaymentId
+	}
+	return ""
+}
+
+func (x *GetPaymentStatusRequest) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+func (x *GetPaymentStatusRequest) GetMethod() PaymentMethod {
+	if x != nil {
+		return x.Method
+	}
+	return PaymentMethod_PAYMENT_METHOD_UNSPECIFIED
+}
+
+func (x *GetPaymentStatusRequest) GetGatewayName() string {
+	if x != nil {
+		return x.GatewayName
 	}
 	return ""
 }
@@ -497,7 +521,10 @@ func (x *GetPaymentStatusResponse) GetPayment() *PaymentData {
 type CancelPaymentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PaymentId     string                 `protobuf:"bytes,1,opt,name=payment_id,json=paymentId,proto3" json:"payment_id,omitempty"`
-	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	OrderId       string                 `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	Method        PaymentMethod          `protobuf:"varint,3,opt,name=method,proto3,enum=payment.PaymentMethod" json:"method,omitempty"`
+	GatewayName   string                 `protobuf:"bytes,4,opt,name=gateway_name,json=gatewayName,proto3" json:"gateway_name,omitempty"`
+	Reason        string                 `protobuf:"bytes,5,opt,name=reason,proto3" json:"reason,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -535,6 +562,27 @@ func (*CancelPaymentRequest) Descriptor() ([]byte, []int) {
 func (x *CancelPaymentRequest) GetPaymentId() string {
 	if x != nil {
 		return x.PaymentId
+	}
+	return ""
+}
+
+func (x *CancelPaymentRequest) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+func (x *CancelPaymentRequest) GetMethod() PaymentMethod {
+	if x != nil {
+		return x.Method
+	}
+	return PaymentMethod_PAYMENT_METHOD_UNSPECIFIED
+}
+
+func (x *CancelPaymentRequest) GetGatewayName() string {
+	if x != nil {
+		return x.GatewayName
 	}
 	return ""
 }
@@ -580,16 +628,22 @@ const file_payment_proto_rawDesc = "" +
 	"\x16ProcessPaymentResponse\x12.\n" +
 	"\apayment\x18\x01 \x01(\v2\x14.payment.PaymentDataR\apayment\x12\x1f\n" +
 	"\vpayment_url\x18\x02 \x01(\tR\n" +
-	"paymentUrl\"8\n" +
+	"paymentUrl\"\xa6\x01\n" +
 	"\x17GetPaymentStatusRequest\x12\x1d\n" +
 	"\n" +
-	"payment_id\x18\x01 \x01(\tR\tpaymentId\"J\n" +
+	"payment_id\x18\x01 \x01(\tR\tpaymentId\x12\x19\n" +
+	"\border_id\x18\x02 \x01(\tR\aorderId\x12.\n" +
+	"\x06method\x18\x03 \x01(\x0e2\x16.payment.PaymentMethodR\x06method\x12!\n" +
+	"\fgateway_name\x18\x04 \x01(\tR\vgatewayName\"J\n" +
 	"\x18GetPaymentStatusResponse\x12.\n" +
-	"\apayment\x18\x01 \x01(\v2\x14.payment.PaymentDataR\apayment\"M\n" +
+	"\apayment\x18\x01 \x01(\v2\x14.payment.PaymentDataR\apayment\"\xbb\x01\n" +
 	"\x14CancelPaymentRequest\x12\x1d\n" +
 	"\n" +
-	"payment_id\x18\x01 \x01(\tR\tpaymentId\x12\x16\n" +
-	"\x06reason\x18\x02 \x01(\tR\x06reason*\xbf\x01\n" +
+	"payment_id\x18\x01 \x01(\tR\tpaymentId\x12\x19\n" +
+	"\border_id\x18\x02 \x01(\tR\aorderId\x12.\n" +
+	"\x06method\x18\x03 \x01(\x0e2\x16.payment.PaymentMethodR\x06method\x12!\n" +
+	"\fgateway_name\x18\x04 \x01(\tR\vgatewayName\x12\x16\n" +
+	"\x06reason\x18\x05 \x01(\tR\x06reason*\xbf\x01\n" +
 	"\rPaymentStatus\x12\x1e\n" +
 	"\x1aPAYMENT_STATUS_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16PAYMENT_STATUS_PENDING\x10\x01\x12\x1c\n" +
@@ -635,23 +689,25 @@ var file_payment_proto_goTypes = []any{
 	(*emptypb.Empty)(nil),            // 9: google.protobuf.Empty
 }
 var file_payment_proto_depIdxs = []int32{
-	0, // 0: payment.PaymentData.status:type_name -> payment.PaymentStatus
-	1, // 1: payment.PaymentData.method:type_name -> payment.PaymentMethod
-	1, // 2: payment.ProcessPaymentRequest.method:type_name -> payment.PaymentMethod
-	8, // 3: payment.ProcessPaymentRequest.metadata:type_name -> payment.ProcessPaymentRequest.MetadataEntry
-	2, // 4: payment.ProcessPaymentResponse.payment:type_name -> payment.PaymentData
-	2, // 5: payment.GetPaymentStatusResponse.payment:type_name -> payment.PaymentData
-	3, // 6: payment.PaymentService.ProcessPayment:input_type -> payment.ProcessPaymentRequest
-	5, // 7: payment.PaymentService.GetPaymentStatus:input_type -> payment.GetPaymentStatusRequest
-	7, // 8: payment.PaymentService.CancelPayment:input_type -> payment.CancelPaymentRequest
-	4, // 9: payment.PaymentService.ProcessPayment:output_type -> payment.ProcessPaymentResponse
-	6, // 10: payment.PaymentService.GetPaymentStatus:output_type -> payment.GetPaymentStatusResponse
-	9, // 11: payment.PaymentService.CancelPayment:output_type -> google.protobuf.Empty
-	9, // [9:12] is the sub-list for method output_type
-	6, // [6:9] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	0,  // 0: payment.PaymentData.status:type_name -> payment.PaymentStatus
+	1,  // 1: payment.PaymentData.method:type_name -> payment.PaymentMethod
+	1,  // 2: payment.ProcessPaymentRequest.method:type_name -> payment.PaymentMethod
+	8,  // 3: payment.ProcessPaymentRequest.metadata:type_name -> payment.ProcessPaymentRequest.MetadataEntry
+	2,  // 4: payment.ProcessPaymentResponse.payment:type_name -> payment.PaymentData
+	1,  // 5: payment.GetPaymentStatusRequest.method:type_name -> payment.PaymentMethod
+	2,  // 6: payment.GetPaymentStatusResponse.payment:type_name -> payment.PaymentData
+	1,  // 7: payment.CancelPaymentRequest.method:type_name -> payment.PaymentMethod
+	3,  // 8: payment.PaymentService.ProcessPayment:input_type -> payment.ProcessPaymentRequest
+	5,  // 9: payment.PaymentService.GetPaymentStatus:input_type -> payment.GetPaymentStatusRequest
+	7,  // 10: payment.PaymentService.CancelPayment:input_type -> payment.CancelPaymentRequest
+	4,  // 11: payment.PaymentService.ProcessPayment:output_type -> payment.ProcessPaymentResponse
+	6,  // 12: payment.PaymentService.GetPaymentStatus:output_type -> payment.GetPaymentStatusResponse
+	9,  // 13: payment.PaymentService.CancelPayment:output_type -> google.protobuf.Empty
+	11, // [11:14] is the sub-list for method output_type
+	8,  // [8:11] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_payment_proto_init() }

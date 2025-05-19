@@ -11,6 +11,7 @@ type Config struct {
 	Log            LogConfig
 	PaymentGateway PaymentGatewayConfig
 	Grpc           GrpcMicroserviceConfig
+	Http           HttpConfig
 }
 
 type LogConfig struct {
@@ -33,6 +34,10 @@ type ZalopayConfig struct {
 
 type GrpcMicroserviceConfig struct {
 	OrderSvcAddr string `env:"ORDER_SERVICE_ADDRESS" envDefault:"localhost:50054"`
+}
+
+type HttpConfig struct {
+	Port string `env:"HTTP_PORT" envDefault:"8080"`
 }
 
 func Load() (*Config, error) {

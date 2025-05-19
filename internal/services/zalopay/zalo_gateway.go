@@ -16,7 +16,20 @@ import (
 	"github.com/vogiaan1904/payment-svc/internal/models"
 	service "github.com/vogiaan1904/payment-svc/internal/services"
 	"github.com/vogiaan1904/payment-svc/protogen/golang/payment"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+// Change the type to be exported by capitalizing it
+type ZalopayGateway struct {
+	OrderTimeoutSeconds         int
+	CreateZalopayPaymentLinkURL string
+	AppID                       int
+	Key1                        string
+	Key2                        string
+	CallbackErrorCode           int
+	HttpClient                  *http.Client
+	Host                        string
+}
 
 // NewZalopayGateway creates a new Zalopay gateway
 func NewZalopayGateway(cfg ZalopayConfig) service.PaymentGatewayInterface {
@@ -244,4 +257,8 @@ func (g *ZalopayGateway) GetPaymentStatus(ctx context.Context, req *payment.GetP
 			Status:  status,
 		},
 	}, nil
+}
+
+func (g *ZalopayGateway) CancelPayment(ctx context.Context, req *payment.CancelPaymentRequest) (*emptypb.Empty, error) {
+	return &emptypb.Empty{}, nil
 }

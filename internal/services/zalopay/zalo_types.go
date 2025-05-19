@@ -1,17 +1,6 @@
 package zalopay
 
-import "net/http"
-
-type ZalopayGateway struct {
-	OrderTimeoutSeconds         int
-	CreateZalopayPaymentLinkURL string
-	AppID                       int
-	Key1                        string
-	Key2                        string
-	CallbackErrorCode           int
-	HttpClient                  *http.Client
-	Host                        string
-}
+// ZalopayGateway struct is now defined in zalo_gateway.go
 
 type ZalopayConfig struct {
 	AppID int

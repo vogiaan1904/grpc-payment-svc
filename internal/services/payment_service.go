@@ -55,10 +55,7 @@ func (svc *implPaymentService) ProcessPayment(ctx context.Context, req *payment.
 		return nil, status.Errorf(codes.Internal, "payment processing failed: %v", err)
 	}
 
-	return &payment.ProcessPaymentResponse{
-		PaymentUrl: pRes.PaymentUrl,
-		Payment:    pRes.Payment,
-	}, nil
+	return pRes, nil
 }
 
 func (svc *implPaymentService) GetPaymentStatus(ctx context.Context, req *payment.GetPaymentStatusRequest) (*payment.GetPaymentStatusResponse, error) {
@@ -68,9 +65,49 @@ func (svc *implPaymentService) GetPaymentStatus(ctx context.Context, req *paymen
 		return nil, status.Errorf(codes.InvalidArgument, "invalid gateway: %v", err)
 	}
 
+	pRes, err := gw.GetPaymentStatus(ctx, req)
+	if err != nil {
+		svc.l.Errorf(ctx, "failed to get payment status: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to get payment status: %v", err)
+	}
+
+	return pRes, nil
 }
 
 func (svc *implPaymentService) CancelPayment(ctx context.Context, req *payment.CancelPaymentRequest) (*emptypb.Empty, error) {
 	gw, err := svc.gatewayFactory.GetGateway(models.GatewayType(req.GatewayName))
-	return &emptypb.Empty{}, nil
+	if err != nil {
+		svc.l.Errorf(ctx, "failed to get payment gateway: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid gateway: %v", err)
+	}
+
+	cRes, err := gw.CancelPayment(ctx, req)
+	if err != nil {
+		svc.l.Errorf(ctx, "failed to cancel payment: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to cancel payment: %v", err)
+	}
+
+	return cRes, nil
+}
+
+// HandleCallback processes payment gateway callbacks
+// This is for HTTP callbacks, not part of the gRPC service definition
+func (svc *implPaymentService) HandleCallback(ctx context.Context, data interface{}, gatewayType models.GatewayType) error {
+	gw, err := svc.gatewayFactory.GetGateway(gatewayType)
+	if err != nil {
+		svc.l.Errorf(ctx, "failed to get payment gateway: %v", err)
+		return status.Errorf(codes.InvalidArgument, "invalid gateway: %v", err)
+	}
+
+	return gw.HandleCallback(ctx, data)
+}
+
+// Export the HandleCallback function to be used with HTTP callbacks
+func HandlePaymentCallback(svc payment.PaymentServiceServer, ctx context.Context, data interface{}, gatewayType models.GatewayType) error {
+	// Type assertion to get the concrete implementation
+	impl, ok := svc.(*implPaymentService)
+	if !ok {
+		return status.Errorf(codes.Internal, "invalid payment service implementation")
+	}
+	return impl.HandleCallback(ctx, data, gatewayType)
 }
