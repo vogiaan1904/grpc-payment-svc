@@ -23,6 +23,7 @@ const (
 	ProductService_CreateProduct_FullMethodName     = "/product.ProductService/CreateProduct"
 	ProductService_FindById_FullMethodName          = "/product.ProductService/FindById"
 	ProductService_FindMany_FullMethodName          = "/product.ProductService/FindMany"
+	ProductService_ListStream_FullMethodName        = "/product.ProductService/ListStream"
 	ProductService_List_FullMethodName              = "/product.ProductService/List"
 	ProductService_UpdateProduct_FullMethodName     = "/product.ProductService/UpdateProduct"
 	ProductService_ReserveInventory_FullMethodName  = "/product.ProductService/ReserveInventory"
@@ -42,7 +43,8 @@ type ProductServiceClient interface {
 	CreateProduct(ctx context.Context, in *CreateProductRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	FindById(ctx context.Context, in *FindByIdRequest, opts ...grpc.CallOption) (*FindByIdResponse, error)
 	FindMany(ctx context.Context, in *FindManyRequest, opts ...grpc.CallOption) (*FindManyResponse, error)
-	List(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ProductData], error)
+	ListStream(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ProductData], error)
+	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	UpdateProduct(ctx context.Context, in *UpdateProductRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ReserveInventory(ctx context.Context, in *ReserveInventoryRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ReleaseInventory(ctx context.Context, in *ReleaseInventoryRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -92,13 +94,13 @@ func (c *productServiceClient) FindMany(ctx context.Context, in *FindManyRequest
 	return out, nil
 }
 
-func (c *productServiceClient) List(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ProductData], error) {
+func (c *productServiceClient) ListStream(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ProductData], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ProductService_ServiceDesc.Streams[0], ProductService_List_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ProductService_ServiceDesc.Streams[0], ProductService_ListStream_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[emptypb.Empty, ProductData]{ClientStream: stream}
+	x := &grpc.GenericClientStream[ListRequest, ProductData]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -109,7 +111,17 @@ func (c *productServiceClient) List(ctx context.Context, in *emptypb.Empty, opts
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ProductService_ListClient = grpc.ServerStreamingClient[ProductData]
+type ProductService_ListStreamClient = grpc.ServerStreamingClient[ProductData]
+
+func (c *productServiceClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListResponse)
+	err := c.cc.Invoke(ctx, ProductService_List_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
 
 func (c *productServiceClient) UpdateProduct(ctx context.Context, in *UpdateProductRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -199,7 +211,8 @@ type ProductServiceServer interface {
 	CreateProduct(context.Context, *CreateProductRequest) (*emptypb.Empty, error)
 	FindById(context.Context, *FindByIdRequest) (*FindByIdResponse, error)
 	FindMany(context.Context, *FindManyRequest) (*FindManyResponse, error)
-	List(*emptypb.Empty, grpc.ServerStreamingServer[ProductData]) error
+	ListStream(*ListRequest, grpc.ServerStreamingServer[ProductData]) error
+	List(context.Context, *ListRequest) (*ListResponse, error)
 	UpdateProduct(context.Context, *UpdateProductRequest) (*emptypb.Empty, error)
 	ReserveInventory(context.Context, *ReserveInventoryRequest) (*emptypb.Empty, error)
 	ReleaseInventory(context.Context, *ReleaseInventoryRequest) (*emptypb.Empty, error)
@@ -228,8 +241,11 @@ func (UnimplementedProductServiceServer) FindById(context.Context, *FindByIdRequ
 func (UnimplementedProductServiceServer) FindMany(context.Context, *FindManyRequest) (*FindManyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindMany not implemented")
 }
-func (UnimplementedProductServiceServer) List(*emptypb.Empty, grpc.ServerStreamingServer[ProductData]) error {
-	return status.Errorf(codes.Unimplemented, "method List not implemented")
+func (UnimplementedProductServiceServer) ListStream(*ListRequest, grpc.ServerStreamingServer[ProductData]) error {
+	return status.Errorf(codes.Unimplemented, "method ListStream not implemented")
+}
+func (UnimplementedProductServiceServer) List(context.Context, *ListRequest) (*ListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedProductServiceServer) UpdateProduct(context.Context, *UpdateProductRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProduct not implemented")
@@ -330,16 +346,34 @@ func _ProductService_FindMany_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProductService_List_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(emptypb.Empty)
+func _ProductService_ListStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ListRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ProductServiceServer).List(m, &grpc.GenericServerStream[emptypb.Empty, ProductData]{ServerStream: stream})
+	return srv.(ProductServiceServer).ListStream(m, &grpc.GenericServerStream[ListRequest, ProductData]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ProductService_ListServer = grpc.ServerStreamingServer[ProductData]
+type ProductService_ListStreamServer = grpc.ServerStreamingServer[ProductData]
+
+func _ProductService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductServiceServer).List(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProductService_List_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductServiceServer).List(ctx, req.(*ListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
 
 func _ProductService_UpdateProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateProductRequest)
@@ -505,6 +539,10 @@ var ProductService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ProductService_FindMany_Handler,
 		},
 		{
+			MethodName: "List",
+			Handler:    _ProductService_List_Handler,
+		},
+		{
 			MethodName: "UpdateProduct",
 			Handler:    _ProductService_UpdateProduct_Handler,
 		},
@@ -539,8 +577,8 @@ var ProductService_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "List",
-			Handler:       _ProductService_List_Handler,
+			StreamName:    "ListStream",
+			Handler:       _ProductService_ListStream_Handler,
 			ServerStreams: true,
 		},
 	},

@@ -17,7 +17,7 @@ var (
 )
 
 func (r *ProcessPaymentRequest) Validate() error {
-	if r.OrderId == "" {
+	if r.OrderCode == "" {
 		return ErrRequiredField
 	}
 	if r.Amount <= 0 {

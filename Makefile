@@ -1,28 +1,51 @@
-.PHONY: proto clean build run docker-dev
+# Build variables
+BINARY_GRPC=payment-grpc-server
+BINARY_HTTP=payment-http-server
+BUILD_DIR=./build
 
-SERVICE_NAME := payment-svc
-PROTO_DIR := ../protos/proto
-PROTOGEN_DIR := protogen
+# Go build flags
+GO_BUILD_FLAGS=-ldflags="-s -w"
 
-proto:
-	@echo "Generating protobuf..."
-	protoc --proto_path=$(PROTO_DIR) \
-		--go_out=$(PROTOGEN_DIR) --go_opt=paths=source_relative \
-		--go-grpc_out=$(PROTOGEN_DIR) --go-grpc_opt=paths=source_relative \
-		$(PROTO_DIR)/payment.proto
+.PHONY: all build clean run-grpc run-http
+
+all: build
+
+build: build-grpc build-http
+
+build-grpc:
+	@echo "Building gRPC server..."
+	@mkdir -p $(BUILD_DIR)
+	@go build $(GO_BUILD_FLAGS) -o $(BUILD_DIR)/$(BINARY_GRPC) ./cmd/grpc
+
+build-http:
+	@echo "Building HTTP server..."
+	@mkdir -p $(BUILD_DIR)
+	@go build $(GO_BUILD_FLAGS) -o $(BUILD_DIR)/$(BINARY_HTTP) ./cmd/http
 
 clean:
-	@echo "Cleaning..."
-	rm -rf $(PROTOGEN_DIR)/golang/payment/*.pb.go
+	@echo "Cleaning up..."
+	@rm -rf $(BUILD_DIR)
 
-build:
-	@echo "Building..."
-	go build -o bin/server cmd/server/main.go
+run-grpc: build-grpc
+	@echo "Running gRPC server..."
+	@$(BUILD_DIR)/$(BINARY_GRPC)
 
-run:
-	@echo "Running..."
-	go run cmd/server/main.go
+run-http: build-http
+	@echo "Running HTTP server..."
+	@$(BUILD_DIR)/$(BINARY_HTTP)
 
-docker-dev:
-	@echo "Starting docker compose development environment..."
-	docker-compose -f docker-compose.dev.yml up -d 
+run-all: build
+	@echo "Running both servers..."
+	@$(BUILD_DIR)/$(BINARY_GRPC) & $(BUILD_DIR)/$(BINARY_HTTP)
+
+docker:
+	@echo "Building Docker image..."
+	@docker build -t payment-service:latest .
+
+docker-run-http:
+	@echo "Running HTTP server in Docker..."
+	@docker run -p 8080:8080 --env-file .env payment-service:latest /app/http-server
+
+docker-run-grpc:
+	@echo "Running gRPC server in Docker..."
+	@docker run -p 50055:50055 --env-file .env payment-service:latest /app/grpc-server 

@@ -12,6 +12,7 @@ type Config struct {
 	PaymentGateway PaymentGatewayConfig
 	Grpc           GrpcMicroserviceConfig
 	Http           HttpConfig
+	Temporal       TemporalConfig
 }
 
 type LogConfig struct {
@@ -30,6 +31,11 @@ type ZalopayConfig struct {
 	Key1  string `env:"ZALOPAY_KEY1" envDefault:"1234567890"`
 	Key2  string `env:"ZALOPAY_KEY2" envDefault:"1234567890"`
 	Host  string `env:"NGROK_TEST_URL" envDefault:""`
+}
+
+type TemporalConfig struct {
+	HostPort  string `env:"TEMPORAL_HOST_PORT" envDefault:"localhost:7233"`
+	Namespace string `env:"TEMPORAL_NAMESPACE" envDefault:"default"`
 }
 
 type GrpcMicroserviceConfig struct {

@@ -138,7 +138,7 @@ func (PaymentMethod) EnumDescriptor() ([]byte, []int) {
 type PaymentData struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	OrderId          string                 `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	OrderCode        string                 `protobuf:"bytes,2,opt,name=order_code,json=orderCode,proto3" json:"order_code,omitempty"`
 	UserId           string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Amount           float64                `protobuf:"fixed64,4,opt,name=amount,proto3" json:"amount,omitempty"`
 	Status           PaymentStatus          `protobuf:"varint,5,opt,name=status,proto3,enum=payment.PaymentStatus" json:"status,omitempty"`
@@ -189,9 +189,9 @@ func (x *PaymentData) GetId() string {
 	return ""
 }
 
-func (x *PaymentData) GetOrderId() string {
+func (x *PaymentData) GetOrderCode() string {
 	if x != nil {
-		return x.OrderId
+		return x.OrderCode
 	}
 	return ""
 }
@@ -262,7 +262,7 @@ func (x *PaymentData) GetUpdatedAt() string {
 // Process Payment
 type ProcessPaymentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	OrderCode     string                 `protobuf:"bytes,1,opt,name=order_code,json=orderCode,proto3" json:"order_code,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Amount        float64                `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
 	Method        PaymentMethod          `protobuf:"varint,4,opt,name=method,proto3,enum=payment.PaymentMethod" json:"method,omitempty"`
@@ -303,9 +303,9 @@ func (*ProcessPaymentRequest) Descriptor() ([]byte, []int) {
 	return file_payment_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ProcessPaymentRequest) GetOrderId() string {
+func (x *ProcessPaymentRequest) GetOrderCode() string {
 	if x != nil {
-		return x.OrderId
+		return x.OrderCode
 	}
 	return ""
 }
@@ -408,7 +408,7 @@ func (x *ProcessPaymentResponse) GetPaymentUrl() string {
 type GetPaymentStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PaymentId     string                 `protobuf:"bytes,1,opt,name=payment_id,json=paymentId,proto3" json:"payment_id,omitempty"`
-	OrderId       string                 `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	OrderCode     string                 `protobuf:"bytes,2,opt,name=order_code,json=orderCode,proto3" json:"order_code,omitempty"`
 	Method        PaymentMethod          `protobuf:"varint,3,opt,name=method,proto3,enum=payment.PaymentMethod" json:"method,omitempty"`
 	GatewayName   string                 `protobuf:"bytes,4,opt,name=gateway_name,json=gatewayName,proto3" json:"gateway_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -452,9 +452,9 @@ func (x *GetPaymentStatusRequest) GetPaymentId() string {
 	return ""
 }
 
-func (x *GetPaymentStatusRequest) GetOrderId() string {
+func (x *GetPaymentStatusRequest) GetOrderCode() string {
 	if x != nil {
-		return x.OrderId
+		return x.OrderCode
 	}
 	return ""
 }
@@ -521,7 +521,7 @@ func (x *GetPaymentStatusResponse) GetPayment() *PaymentData {
 type CancelPaymentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PaymentId     string                 `protobuf:"bytes,1,opt,name=payment_id,json=paymentId,proto3" json:"payment_id,omitempty"`
-	OrderId       string                 `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	OrderCode     string                 `protobuf:"bytes,2,opt,name=order_code,json=orderCode,proto3" json:"order_code,omitempty"`
 	Method        PaymentMethod          `protobuf:"varint,3,opt,name=method,proto3,enum=payment.PaymentMethod" json:"method,omitempty"`
 	GatewayName   string                 `protobuf:"bytes,4,opt,name=gateway_name,json=gatewayName,proto3" json:"gateway_name,omitempty"`
 	Reason        string                 `protobuf:"bytes,5,opt,name=reason,proto3" json:"reason,omitempty"`
@@ -566,9 +566,9 @@ func (x *CancelPaymentRequest) GetPaymentId() string {
 	return ""
 }
 
-func (x *CancelPaymentRequest) GetOrderId() string {
+func (x *CancelPaymentRequest) GetOrderCode() string {
 	if x != nil {
-		return x.OrderId
+		return x.OrderCode
 	}
 	return ""
 }
@@ -598,10 +598,11 @@ var File_payment_proto protoreflect.FileDescriptor
 
 const file_payment_proto_rawDesc = "" +
 	"\n" +
-	"\rpayment.proto\x12\apayment\x1a\x1bgoogle/protobuf/empty.proto\"\xf9\x02\n" +
+	"\rpayment.proto\x12\apayment\x1a\x1bgoogle/protobuf/empty.proto\"\xfd\x02\n" +
 	"\vPaymentData\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
-	"\border_id\x18\x02 \x01(\tR\aorderId\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
+	"\n" +
+	"order_code\x18\x02 \x01(\tR\torderCode\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06amount\x18\x04 \x01(\x01R\x06amount\x12.\n" +
 	"\x06status\x18\x05 \x01(\x0e2\x16.payment.PaymentStatusR\x06status\x12.\n" +
@@ -613,9 +614,10 @@ const file_payment_proto_rawDesc = "" +
 	"created_at\x18\n" +
 	" \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\tR\tupdatedAt\"\xdf\x02\n" +
-	"\x15ProcessPaymentRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x17\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt\"\xe3\x02\n" +
+	"\x15ProcessPaymentRequest\x12\x1d\n" +
+	"\n" +
+	"order_code\x18\x01 \x01(\tR\torderCode\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06amount\x18\x03 \x01(\x01R\x06amount\x12.\n" +
 	"\x06method\x18\x04 \x01(\x0e2\x16.payment.PaymentMethodR\x06method\x12 \n" +
@@ -628,19 +630,21 @@ const file_payment_proto_rawDesc = "" +
 	"\x16ProcessPaymentResponse\x12.\n" +
 	"\apayment\x18\x01 \x01(\v2\x14.payment.PaymentDataR\apayment\x12\x1f\n" +
 	"\vpayment_url\x18\x02 \x01(\tR\n" +
-	"paymentUrl\"\xa6\x01\n" +
+	"paymentUrl\"\xaa\x01\n" +
 	"\x17GetPaymentStatusRequest\x12\x1d\n" +
 	"\n" +
-	"payment_id\x18\x01 \x01(\tR\tpaymentId\x12\x19\n" +
-	"\border_id\x18\x02 \x01(\tR\aorderId\x12.\n" +
+	"payment_id\x18\x01 \x01(\tR\tpaymentId\x12\x1d\n" +
+	"\n" +
+	"order_code\x18\x02 \x01(\tR\torderCode\x12.\n" +
 	"\x06method\x18\x03 \x01(\x0e2\x16.payment.PaymentMethodR\x06method\x12!\n" +
 	"\fgateway_name\x18\x04 \x01(\tR\vgatewayName\"J\n" +
 	"\x18GetPaymentStatusResponse\x12.\n" +
-	"\apayment\x18\x01 \x01(\v2\x14.payment.PaymentDataR\apayment\"\xbb\x01\n" +
+	"\apayment\x18\x01 \x01(\v2\x14.payment.PaymentDataR\apayment\"\xbf\x01\n" +
 	"\x14CancelPaymentRequest\x12\x1d\n" +
 	"\n" +
-	"payment_id\x18\x01 \x01(\tR\tpaymentId\x12\x19\n" +
-	"\border_id\x18\x02 \x01(\tR\aorderId\x12.\n" +
+	"payment_id\x18\x01 \x01(\tR\tpaymentId\x12\x1d\n" +
+	"\n" +
+	"order_code\x18\x02 \x01(\tR\torderCode\x12.\n" +
 	"\x06method\x18\x03 \x01(\x0e2\x16.payment.PaymentMethodR\x06method\x12!\n" +
 	"\fgateway_name\x18\x04 \x01(\tR\vgatewayName\x12\x16\n" +
 	"\x06reason\x18\x05 \x01(\tR\x06reason*\xbf\x01\n" +
