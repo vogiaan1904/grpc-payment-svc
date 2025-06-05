@@ -123,7 +123,7 @@ func (svc *implPaymentService) HandleCallback(ctx context.Context, data interfac
 	}
 
 	svc.l.Infof(ctx, "Starting OrderProcessingWorkflow with ID: %s", wfID)
-	we, err := svc.temporalClient.ExecuteWorkflow(ctx, wfOpts, "ProcessPostPaymentOrder", &wfParams)
+	we, err := svc.temporalClient.ExecuteWorkflow(ctx, wfOpts, "ProcessPostPaymentOrder", wfParams)
 	if err != nil {
 		svc.l.Errorf(ctx, "Failed to start OrderProcessingWorkflow: %v", err)
 		return status.Errorf(codes.Internal, "failed to initiate order processing: %v", err)
