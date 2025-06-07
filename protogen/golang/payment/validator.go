@@ -17,7 +17,7 @@ var (
 	ErrInvalidInput  = errors.New("invalid input")
 )
 
-func (r *ProcessPaymentRequest) Validate() error {
+func (r *ProcessBankTransferPaymentRequest) Validate() error {
 	log.Printf("Validate request: %+v", r)
 	if r.OrderCode == "" {
 		log.Printf("Order code is required")
@@ -27,16 +27,12 @@ func (r *ProcessPaymentRequest) Validate() error {
 		log.Printf("Amount is required")
 		return ErrInvalidInput
 	}
-	if r.Method == 0 {
-		log.Printf("Method is required")
-		return ErrRequiredField
-	}
 	if r.UserId == "" {
 		log.Printf("User ID is required")
 		return ErrRequiredField
 	}
-	if r.GatewayName != "" && r.GatewayName != string(models.GatewayTypeZalopay) {
-		log.Printf("Gateway name is invalid")
+	if r.Provider != string(models.GatewayTypeZalopay) {
+		log.Printf("Provider is invalid")
 		return ErrInvalidInput
 	}
 

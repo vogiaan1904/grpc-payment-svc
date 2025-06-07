@@ -1,4 +1,4 @@
-package service
+package banktransfer
 
 import (
 	"context"
@@ -33,15 +33,16 @@ func NewPaymentService(l log.Logger, factory *PaymentGatewayFactory, orderSvc or
 	}
 }
 
-func (svc *implPaymentService) ProcessPayment(ctx context.Context, req *payment.ProcessPaymentRequest) (*payment.ProcessPaymentResponse, error) {
-	res, err := svc.orderSvc.FindOne(ctx, &order.FindOneRequest{Code: req.OrderCode})
+func (svc *implPaymentService) ProcessBankTransferPayment(ctx context.Context, req *payment.ProcessBankTransferPaymentRequest) (*payment.ProcessBankTransferPaymentResponse, error) {
+	res, err := svc.orderSvc.FindOne(ctx, &order.FindOneRequest{Request: &order.FindOneRequest_Code{Code: req.OrderCode}})
 	if err != nil {
 		svc.l.Errorf(ctx, "failed to find order: %v", err)
-		return nil, status.Errorf(codes.Internal, "error retrieving order: %v", err)
+		return nil, status.Error(codes.Internal, ErrInternal.Error())
 	}
 
 	if res == nil || res.Order == nil {
-		return nil, status.Error(codes.NotFound, "order not found")
+		svc.l.Errorf(ctx, "order not found: %v", ErrOrderNotFound)
+		return nil, status.Error(codes.NotFound, ErrOrderNotFound.Error())
 	}
 
 	if res.Order.Status != order.OrderStatus_PAYMENT_PENDING {
@@ -49,39 +50,29 @@ func (svc *implPaymentService) ProcessPayment(ctx context.Context, req *payment.
 		return nil, status.Error(codes.FailedPrecondition, ErrOrderNotPending.Error())
 	}
 
-	gw, err := svc.gatewayFactory.GetGateway(models.GatewayType(req.GatewayName))
+	gw, err := svc.gatewayFactory.GetGateway(models.GatewayType(req.Provider))
 	if err != nil {
 		svc.l.Errorf(ctx, "failed to get payment gateway: %v", err)
-		return nil, status.Errorf(codes.InvalidArgument, "invalid gateway: %v", err)
+		return nil, status.Error(codes.InvalidArgument, ErrInvalidGateway.Error())
 	}
 
 	pRes, err := gw.ProcessPayment(ctx, req)
 	if err != nil {
 		svc.l.Errorf(ctx, "payment processing failed: %v", err)
-		return nil, status.Errorf(codes.Internal, "payment processing failed: %v", err)
+		return nil, status.Error(codes.Internal, ErrInternal.Error())
 	}
 
 	return pRes, nil
 }
 
-func (svc *implPaymentService) GetPaymentStatus(ctx context.Context, req *payment.GetPaymentStatusRequest) (*payment.GetPaymentStatusResponse, error) {
-	gw, err := svc.gatewayFactory.GetGateway(models.GatewayType(req.GatewayName))
+func (svc *implPaymentService) CancelBankTransferPayment(ctx context.Context, req *payment.CancelBankTransferPaymentRequest) (*emptypb.Empty, error) {
+	resp, err := svc.orderSvc.FindOne(ctx, &order.FindOneRequest{Request: &order.FindOneRequest_Code{Code: req.GetOrderCode()}})
 	if err != nil {
-		svc.l.Errorf(ctx, "failed to get payment gateway: %v", err)
-		return nil, status.Errorf(codes.InvalidArgument, "invalid gateway: %v", err)
+		svc.l.Errorf(ctx, "failed to find order: %v", err)
+		return nil, status.Errorf(codes.Internal, "error retrieving order: %v", err)
 	}
 
-	pRes, err := gw.GetPaymentStatus(ctx, req)
-	if err != nil {
-		svc.l.Errorf(ctx, "failed to get payment status: %v", err)
-		return nil, status.Errorf(codes.Internal, "failed to get payment status: %v", err)
-	}
-
-	return pRes, nil
-}
-
-func (svc *implPaymentService) CancelPayment(ctx context.Context, req *payment.CancelPaymentRequest) (*emptypb.Empty, error) {
-	gw, err := svc.gatewayFactory.GetGateway(models.GatewayType(req.GatewayName))
+	gw, err := svc.gatewayFactory.GetGateway(models.GatewayType(resp.Order.Provider))
 	if err != nil {
 		svc.l.Errorf(ctx, "failed to get payment gateway: %v", err)
 		return nil, status.Errorf(codes.InvalidArgument, "invalid gateway: %v", err)

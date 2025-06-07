@@ -147,12 +147,13 @@ type ProductData struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Sku           string                 `protobuf:"bytes,3,opt,name=sku,proto3" json:"sku,omitempty"`
-	Stock         int32                  `protobuf:"varint,4,opt,name=stock,proto3" json:"stock,omitempty"`
-	Price         float64                `protobuf:"fixed64,5,opt,name=price,proto3" json:"price,omitempty"`
-	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
-	Active        bool                   `protobuf:"varint,7,opt,name=active,proto3" json:"active,omitempty"`
-	Categories    []*CategoryData        `protobuf:"bytes,8,rep,name=categories,proto3" json:"categories,omitempty"`
-	Images        []*ImageData           `protobuf:"bytes,9,rep,name=images,proto3" json:"images,omitempty"`
+	TotalStock    int32                  `protobuf:"varint,4,opt,name=total_stock,json=totalStock,proto3" json:"total_stock,omitempty"`
+	ReservedStock int32                  `protobuf:"varint,5,opt,name=reserved_stock,json=reservedStock,proto3" json:"reserved_stock,omitempty"`
+	Price         float64                `protobuf:"fixed64,6,opt,name=price,proto3" json:"price,omitempty"`
+	Description   string                 `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
+	Active        bool                   `protobuf:"varint,8,opt,name=active,proto3" json:"active,omitempty"`
+	Categories    []*CategoryData        `protobuf:"bytes,9,rep,name=categories,proto3" json:"categories,omitempty"`
+	Images        []*ImageData           `protobuf:"bytes,10,rep,name=images,proto3" json:"images,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -208,9 +209,16 @@ func (x *ProductData) GetSku() string {
 	return ""
 }
 
-func (x *ProductData) GetStock() int32 {
+func (x *ProductData) GetTotalStock() int32 {
 	if x != nil {
-		return x.Stock
+		return x.TotalStock
+	}
+	return 0
+}
+
+func (x *ProductData) GetReservedStock() int32 {
+	if x != nil {
+		return x.ReservedStock
 	}
 	return 0
 }
@@ -1338,19 +1346,22 @@ const file_product_proto_rawDesc = "" +
 	"\fCategoryData\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
-	"\x04slug\x18\x03 \x01(\tR\x04slug\"\x8c\x02\n" +
+	"\x04slug\x18\x03 \x01(\tR\x04slug\"\xbe\x02\n" +
 	"\vProductData\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
-	"\x03sku\x18\x03 \x01(\tR\x03sku\x12\x14\n" +
-	"\x05stock\x18\x04 \x01(\x05R\x05stock\x12\x14\n" +
-	"\x05price\x18\x05 \x01(\x01R\x05price\x12 \n" +
-	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x16\n" +
-	"\x06active\x18\a \x01(\bR\x06active\x125\n" +
+	"\x03sku\x18\x03 \x01(\tR\x03sku\x12\x1f\n" +
+	"\vtotal_stock\x18\x04 \x01(\x05R\n" +
+	"totalStock\x12%\n" +
+	"\x0ereserved_stock\x18\x05 \x01(\x05R\rreservedStock\x12\x14\n" +
+	"\x05price\x18\x06 \x01(\x01R\x05price\x12 \n" +
+	"\vdescription\x18\a \x01(\tR\vdescription\x12\x16\n" +
+	"\x06active\x18\b \x01(\bR\x06active\x125\n" +
 	"\n" +
-	"categories\x18\b \x03(\v2\x15.product.CategoryDataR\n" +
+	"categories\x18\t \x03(\v2\x15.product.CategoryDataR\n" +
 	"categories\x12*\n" +
-	"\x06images\x18\t \x03(\v2\x12.product.ImageDataR\x06images\"\xba\x01\n" +
+	"\x06images\x18\n" +
+	" \x03(\v2\x12.product.ImageDataR\x06images\"\xba\x01\n" +
 	"\x14CreateProductRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05stock\x18\x03 \x01(\x05R\x05stock\x12\x14\n" +

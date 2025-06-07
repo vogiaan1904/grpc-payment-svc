@@ -11,8 +11,8 @@ import (
 	"github.com/vogiaan1904/payment-svc/config"
 	"github.com/vogiaan1904/payment-svc/internal/interceptors"
 	"github.com/vogiaan1904/payment-svc/internal/models"
-	service "github.com/vogiaan1904/payment-svc/internal/services"
-	zpGW "github.com/vogiaan1904/payment-svc/internal/services/zalopay"
+	bankTf "github.com/vogiaan1904/payment-svc/internal/services/banktransfer"
+	zpGW "github.com/vogiaan1904/payment-svc/internal/services/banktransfer/zalopay"
 	pkgGrpc "github.com/vogiaan1904/payment-svc/pkg/grpc"
 	pkgLog "github.com/vogiaan1904/payment-svc/pkg/log"
 	"github.com/vogiaan1904/payment-svc/protogen/golang/payment"
@@ -32,15 +32,13 @@ func main() {
 		Mode:     cfg.Log.Mode,
 	})
 
-	// Default gRPC server address (configure in .env if needed)
 	grpcAddr := ":50055"
-
 	lnr, err := net.Listen("tcp", grpcAddr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	// Initialize Temporal client
+	// Temporal client
 	tCli, err := client.Dial(client.Options{
 		HostPort:  cfg.Temporal.HostPort,
 		Namespace: cfg.Temporal.Namespace,
@@ -51,17 +49,8 @@ func main() {
 	defer tCli.Close()
 	l.Info(context.Background(), "Temporal Client connected.")
 
-	// Initialize payment gateways
-	gatewayFactory := service.NewPaymentGatewayFactory()
-	gatewayFactory.RegisterGateway(models.GatewayTypeZalopay, zpGW.NewZalopayGateway(zpGW.ZalopayConfig{
-		AppID: cfg.PaymentGateway.Zalopay.AppID,
-		Key1:  cfg.PaymentGateway.Zalopay.Key1,
-		Key2:  cfg.PaymentGateway.Zalopay.Key2,
-		Host:  cfg.PaymentGateway.Zalopay.Host,
-	}))
-
-	// Initialize gRPC clients
-	grpcClients, cleanupGrpc, err := pkgGrpc.InitGrpcClients(cfg.Grpc.OrderSvcAddr, l, cfg.Log.RedactFields)
+	// gRPC clients
+	gprcClis, cleanupGrpc, err := pkgGrpc.InitGrpcClients(cfg.Grpc.OrderSvcAddr, l, cfg.Log.RedactFields)
 	if err != nil {
 		log.Fatalf("failed to initialize gRPC clients: %v", err)
 	}
@@ -71,8 +60,14 @@ func main() {
 		grpc.ChainUnaryInterceptor(interceptors.ValidationInterceptor, interceptors.ErrorHandlerInterceptor),
 	)
 
-	paymentSvc := service.NewPaymentService(l, gatewayFactory, grpcClients.Order, tCli)
-	payment.RegisterPaymentServiceServer(sv, paymentSvc)
+	// Payment gateways
+	zpGW := zpGW.NewZalopayGateway(cfg.PaymentGateway.Zalopay.AppID, cfg.PaymentGateway.Zalopay.Key1, cfg.PaymentGateway.Zalopay.Key2, cfg.PaymentGateway.Zalopay.Host)
+
+	gwf := bankTf.NewPaymentGatewayFactory()
+	gwf.RegisterGateway(models.GatewayTypeZalopay, zpGW)
+
+	pmtSvc := bankTf.NewPaymentService(l, gwf, gprcClis.Order, tCli)
+	payment.RegisterPaymentServiceServer(sv, pmtSvc)
 
 	go func() {
 		l.Info(context.Background(), "Payment gRPC server started on %s", grpcAddr)

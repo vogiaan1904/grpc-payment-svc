@@ -2,13 +2,6 @@ package zalopay
 
 // ZalopayGateway struct is now defined in zalo_gateway.go
 
-type ZalopayConfig struct {
-	AppID int
-	Key1  string
-	Key2  string
-	Host  string
-}
-
 type ZaloPayRequestConfigInterface struct {
 	OrderCode   string
 	Amount      int64

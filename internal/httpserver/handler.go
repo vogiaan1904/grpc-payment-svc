@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/vogiaan1904/payment-svc/internal/models"
-	service "github.com/vogiaan1904/payment-svc/internal/services"
-	zpGW "github.com/vogiaan1904/payment-svc/internal/services/zalopay"
+	bankTf "github.com/vogiaan1904/payment-svc/internal/services/banktransfer"
+	zpGW "github.com/vogiaan1904/payment-svc/internal/services/banktransfer/zalopay"
 )
 
 func (s *Server) handleZalopayCallback(w http.ResponseWriter, r *http.Request) {
@@ -17,7 +17,7 @@ func (s *Server) handleZalopayCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := service.HandlePaymentCallback(s.paymentSvc, r.Context(), callbackData, models.GatewayTypeZalopay); err != nil {
+	if err := bankTf.HandlePaymentCallback(s.paymentSvc, r.Context(), callbackData, models.GatewayTypeZalopay); err != nil {
 		s.logger.Errorf(r.Context(), "Failed to process callback: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return

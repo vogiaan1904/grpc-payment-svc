@@ -10,8 +10,8 @@ import (
 	"github.com/vogiaan1904/payment-svc/config"
 	"github.com/vogiaan1904/payment-svc/internal/httpserver"
 	"github.com/vogiaan1904/payment-svc/internal/models"
-	service "github.com/vogiaan1904/payment-svc/internal/services"
-	zpGW "github.com/vogiaan1904/payment-svc/internal/services/zalopay"
+	bankTf "github.com/vogiaan1904/payment-svc/internal/services/banktransfer"
+	zpGW "github.com/vogiaan1904/payment-svc/internal/services/banktransfer/zalopay"
 	pkgGrpc "github.com/vogiaan1904/payment-svc/pkg/grpc"
 	pkgLog "github.com/vogiaan1904/payment-svc/pkg/log"
 	"go.temporal.io/sdk/client"
@@ -29,7 +29,7 @@ func main() {
 		Mode:     cfg.Log.Mode,
 	})
 
-	// Initialize Temporal client
+	// Temporal client
 	tCli, err := client.Dial(client.Options{
 		HostPort:  cfg.Temporal.HostPort,
 		Namespace: cfg.Temporal.Namespace,
@@ -40,26 +40,22 @@ func main() {
 	defer tCli.Close()
 	l.Info(context.Background(), "Temporal Client connected.")
 
-	// Initialize payment gateways
-	gatewayFactory := service.NewPaymentGatewayFactory()
-	gatewayFactory.RegisterGateway(models.GatewayTypeZalopay, zpGW.NewZalopayGateway(zpGW.ZalopayConfig{
-		AppID: cfg.PaymentGateway.Zalopay.AppID,
-		Key1:  cfg.PaymentGateway.Zalopay.Key1,
-		Key2:  cfg.PaymentGateway.Zalopay.Key2,
-		Host:  cfg.PaymentGateway.Zalopay.Host,
-	}))
-
-	// Initialize gRPC clients
+	// gRPC clients
 	grpcClients, cleanupGrpc, err := pkgGrpc.InitGrpcClients(cfg.Grpc.OrderSvcAddr, l, cfg.Log.RedactFields)
 	if err != nil {
 		l.Fatalf(context.Background(), "failed to initialize gRPC clients: %v", err)
 	}
 	defer cleanupGrpc()
 
-	paymentSvc := service.NewPaymentService(l, gatewayFactory, grpcClients.Order, tCli)
+	// Payment gateways
+	zpGW := zpGW.NewZalopayGateway(cfg.PaymentGateway.Zalopay.AppID, cfg.PaymentGateway.Zalopay.Key1, cfg.PaymentGateway.Zalopay.Key2, cfg.PaymentGateway.Zalopay.Host)
+	gwf := bankTf.NewPaymentGatewayFactory()
+	gwf.RegisterGateway(models.GatewayTypeZalopay, zpGW)
+
+	pmtSvc := bankTf.NewPaymentService(l, gwf, grpcClients.Order, tCli)
 
 	httpAddr := ":" + cfg.Http.Port
-	httpServer := httpserver.New(httpAddr, l, paymentSvc)
+	httpServer := httpserver.New(httpAddr, l, pmtSvc)
 
 	go func() {
 		if err := httpServer.Start(); err != nil {

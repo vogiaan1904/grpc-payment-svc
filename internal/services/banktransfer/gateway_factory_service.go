@@ -1,4 +1,4 @@
-package service
+package banktransfer
 
 import (
 	"fmt"
