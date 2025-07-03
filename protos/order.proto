@@ -1,0 +1,117 @@
+syntax = "proto3";
+package order;
+option go_package = "github.com/vogiaan1904/e-commerce-grpc-nest-proto/protogen/golang/order";
+import "google/protobuf/empty.proto";
+
+service OrderService {
+  rpc Create(CreateRequest) returns (CreateResponse) {}
+  rpc FindOne(FindOneRequest) returns (FindOneResponse) {}
+  rpc FindMany(FindManyRequest) returns (FindManyResponse) {}
+  rpc UpdateStatus(UpdateStatusRequest) returns (google.protobuf.Empty) {}
+}
+
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  CREATED = 1;
+  COMPLETED = 2;
+  CANCELLED = 3;
+  INVENTORY_RESERVED = 4;
+  PAYMENT_PENDING = 5;
+  PAYMENT_FAILED = 6;
+  PAYMENT_SUCCESS = 7;
+}
+
+message OrderData {
+  string id = 1;
+  string code = 2;
+  repeated OrderItem items = 3;
+  string user_id = 4;
+  OrderStatus status = 5;
+  double total_amount = 6;
+  string payment_method = 7;
+  string provider = 8;
+  string provider_details = 9;
+}
+
+message OrderItemRequest {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message OrderItem {
+  string product_id = 1;
+  string product_name = 2;
+  double product_price = 3;
+  int32 quantity = 4;
+  double total_amount = 5;
+}
+
+
+// Create
+message CreateRequest {
+  repeated OrderItemRequest items = 1;
+  string user_id = 2;
+  string payment_method = 3;
+  string provider = 4;
+  string provider_details = 5;
+  map<string, string> metadata = 6;
+}
+
+message CreateResponse {
+  string order_code = 1;
+  string workflow_id = 2;
+  string payment_url = 3;
+}
+
+// FindOne
+message FindOneRequest {
+  oneof request {
+    string id = 1;
+    string code = 2;
+  }
+}
+
+message FindOneResponse {
+  OrderData order = 3;
+}
+
+// FindMany
+message FindManyRequest {
+  string user_id = 1;
+  OrderStatus status = 2;
+}
+
+message FindManyResponse {
+  repeated OrderData orders = 3;
+}
+
+// UpdateStatus
+message UpdateStatusRequest {
+  oneof request {
+    string id = 1;
+    string code = 2;
+  }
+  OrderStatus status = 3;
+}
+
+
+// Workflow
+
+enum OrderWorkflowStatus {
+  ORDER_WORKFLOW_STATUS_UNSPECIFIED = 0;
+  ORDER_WORKFLOW_STATUS_PROCESSING = 1;
+  ORDER_WORKFLOW_STATUS_COMPLETED = 2;
+  ORDER_WORKFLOW_STATUS_CANCELLED = 3;
+}
+
+message OrderWorkflowParams {
+  string order_code = 1;
+  string user_id = 2;
+  double total_amount = 3;
+}
+
+message OrderWorkflowResult {
+  string order_code = 1;
+  string status = 2;
+  string error_message = 3;
+}

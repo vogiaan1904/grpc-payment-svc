@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package payment;
+option go_package = "github.com/vogiaan1904/e-commerce-grpc-nest-proto/protogen/golang/payment";
+import "google/protobuf/empty.proto";
+
+service PaymentService {
+  rpc ProcessPayment(ProcessPaymentRequest) returns (ProcessPaymentResponse) {}
+  rpc CancelPayment(CancelPaymentRequest) returns (google.protobuf.Empty) {}
+}
+
+// Bank transfer method
+message PaymentData {
+  string id = 1;
+  string order_code = 2;
+  string user_id = 3;
+  double amount = 4;
+  string provider = 5;
+  string provider_details = 6;
+  map<string, string> metadata = 7; 
+}
+
+message ProcessPaymentRequest {
+  string order_code = 1;
+  string user_id = 2;
+  double amount = 3;
+  string provider = 4;                  
+  string provider_details = 5;    
+  map<string, string> metadata = 6; 
+}
+
+message ProcessPaymentResponse {
+  PaymentData payment = 1;
+  string payment_url = 2; 
+}
+
+message CancelPaymentRequest {
+  oneof payment_identifier {
+    string payment_id = 1;
+    string order_code = 2;
+  }
+  string reason = 3;
+}

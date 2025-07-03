@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package product;
+option go_package = "github.com/vogiaan1904/e-commerce-grpc-nest-proto/protogen/golang/product";
+
+import "google/protobuf/empty.proto";
+
+service ProductService {
+  // Product
+  rpc CreateProduct(CreateProductRequest) returns (google.protobuf.Empty) {}
+  rpc FindById(FindByIdRequest) returns (FindByIdResponse) {}
+  rpc FindMany(FindManyRequest) returns (FindManyResponse) {}
+  rpc ListStream(ListRequest) returns (stream ProductData) {}
+  rpc List(ListRequest) returns (ListResponse) {}
+  rpc UpdateProduct(UpdateProductRequest) returns (google.protobuf.Empty) {}
+  rpc ReserveInventory(ReserveInventoryRequest) returns (google.protobuf.Empty) {}
+  rpc ReleaseInventory(ReleaseInventoryRequest) returns (google.protobuf.Empty) {}
+  rpc ActivateProduct(ActivateProductRequest) returns (google.protobuf.Empty) {}
+  rpc DeleteProduct(DeleteProductRequest) returns (google.protobuf.Empty) {}
+  rpc UpdateStock(UpdateStockRequest) returns (google.protobuf.Empty) {}
+
+  // Category
+  rpc CreateCategory(CreateCategoryRequest) returns (google.protobuf.Empty) {}
+  rpc FindAllCategories(google.protobuf.Empty) returns (FindAllCategoriesResponse) {}
+}
+
+message ImageData {
+  string id = 1;
+  string url = 2;
+  bool is_primary = 3;
+}
+
+message CategoryData {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+}
+
+message ProductData {
+  string id = 1;
+  string name = 2;
+  string sku = 3;
+  int32 total_stock = 4;
+  int32 reserved_stock = 5;
+  double price = 6;
+  string description = 7;
+  bool active = 8;
+  repeated CategoryData categories = 9;
+  repeated ImageData images = 10;
+}
+
+// CreateProduct
+message CreateProductRequest {
+  string name = 1;
+  int32 stock = 3;
+  double price = 4;
+  string description = 5;
+  repeated string category_ids = 6;  
+  repeated string image_urls = 7; 
+}
+
+// FindOne
+message FindByIdRequest {
+  string id = 1;
+}
+
+message FindByIdResponse {
+  ProductData product = 1;
+}
+
+// Pagination
+message PaginationRequest {
+  int32 page = 1;
+  int32 perPage = 2;
+}
+
+message PaginationResponse {
+  int32 total = 1;
+  int32 total_page = 2;
+  int32 current_page = 3;
+  int32 per_page = 4;
+  int32 next = 5;
+  int32 prev = 6;
+}
+
+// FindMany
+message FindManyRequest {
+  PaginationRequest pagination = 1;
+  string shop_id = 2;
+  string category_id = 3;
+  string search_term = 4;
+}
+
+message FindManyResponse {
+  repeated ProductData products = 3;
+  PaginationResponse pagination = 4;
+
+}
+
+message ListRequest {
+  repeated string ids = 1;
+}
+
+message ListResponse {
+  repeated ProductData products = 1;
+}
+
+// UpdateProduct
+message UpdateProductRequest {
+  string id = 1;
+  string name = 2;
+  double price = 3;
+  string description = 4;
+  repeated string category_ids = 5;  
+  repeated string image_urls = 6;   
+}
+
+// ReserveInventory
+message ReserveInventoryItem{
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message ReserveInventoryRequest {
+  repeated ReserveInventoryItem items = 1;
+}
+
+
+// ReleaseInventory
+message ReleaseInventoryItem {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message ReleaseInventoryRequest {
+  repeated ReleaseInventoryItem items = 1;  
+}
+
+// UpdateStock
+message UpdateStockItem {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message UpdateStockRequest {
+  repeated UpdateStockItem items = 1;
+}
+
+// ActivateProduct
+message ActivateProductRequest {
+  string id = 1;
+}
+
+// DeleteProduct
+message DeleteProductRequest {
+  string id = 1;
+}
+
+// Category
+message CreateCategoryRequest {
+  string name = 1;
+}
+
+message FindAllCategoriesResponse {
+  repeated CategoryData categories = 3;
+}
+
