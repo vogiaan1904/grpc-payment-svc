@@ -8,8 +8,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -18,32 +19,6 @@ import (
 	"github.com/vogiaan1904/payment-svc/protogen/golang/payment"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
-
-// Change the type to be exported by capitalizing it
-type ZalopayGateway struct {
-	OrderTimeoutSeconds         int
-	CreateZalopayPaymentLinkURL string
-	AppID                       int
-	Key1                        string
-	Key2                        string
-	CallbackErrorCode           int
-	HttpClient                  *http.Client
-	Host                        string
-}
-
-// NewZalopayGateway creates a new Zalopay gateway
-func NewZalopayGateway(appID int, key1 string, key2 string, host string) bankTf.PaymentGatewayInterface {
-	return &ZalopayGateway{
-		OrderTimeoutSeconds:         30,
-		CreateZalopayPaymentLinkURL: "https://sb-openapi.zalopay.vn/v2/create",
-		AppID:                       appID,
-		Key1:                        key1,
-		Key2:                        key2,
-		CallbackErrorCode:           -1,
-		HttpClient:                  &http.Client{},
-		Host:                        host,
-	}
-}
 
 func (z *ZalopayGateway) initZaloPayRequestConfig(data ZaloPayRequestConfigInterface) ZaloPayRequestConfig {
 	now := time.Now()
@@ -63,7 +38,7 @@ func (z *ZalopayGateway) initZaloPayRequestConfig(data ZaloPayRequestConfigInter
 	itemJSON, _ := json.Marshal([]interface{}{})
 
 	config := ZaloPayRequestConfig{
-		AppID:              strconv.Itoa(z.AppID),
+		AppID:              z.AppID,
 		AppUser:            "user123",
 		AppTime:            now.UnixMilli(),
 		Amount:             data.Amount,
@@ -77,7 +52,7 @@ func (z *ZalopayGateway) initZaloPayRequestConfig(data ZaloPayRequestConfigInter
 		Mac:                "",
 	}
 
-	macInput := fmt.Sprintf("%s|%s|%s|%d|%d|%s|%s",
+	macInput := fmt.Sprintf("%d|%s|%s|%d|%d|%s|%s",
 		config.AppID,
 		config.AppTransID,
 		config.AppUser,
@@ -94,12 +69,22 @@ func (z *ZalopayGateway) initZaloPayRequestConfig(data ZaloPayRequestConfigInter
 	return config
 }
 
-func (g *ZalopayGateway) ProcessPayment(ctx context.Context, req *payment.ProcessBankTransferPaymentRequest) (*payment.ProcessBankTransferPaymentResponse, error) {
+func (g *ZalopayGateway) ProcessPayment(ctx context.Context, req *payment.ProcessPaymentRequest) (*payment.ProcessPaymentResponse, error) {
+	log.Printf("ProcessPayment request metadata: %+v", req.Metadata)
+
+	returnURL := req.Metadata["return_url"]
+	if returnURL == "" {
+		returnURL = "http://localhost:3000/payment/success"
+		log.Printf("No return_url in metadata, using fallback: %s", returnURL)
+	} else {
+		log.Printf("Using return_url from metadata: %s", returnURL)
+	}
+
 	data := g.initZaloPayRequestConfig(ZaloPayRequestConfigInterface{
 		OrderCode:   req.OrderCode,
 		Amount:      int64(req.Amount),
 		Description: "E-Commerce",
-		ReturnURL:   req.Metadata["return_url"],
+		ReturnURL:   returnURL,
 		Host:        g.Host,
 	})
 
@@ -107,6 +92,9 @@ func (g *ZalopayGateway) ProcessPayment(ctx context.Context, req *payment.Proces
 	if err != nil {
 		return nil, bankTf.ErrInternal
 	}
+
+	// Add debug logging to see what we're sending
+	log.Printf("Sending to ZaloPay: %s", string(jsonData))
 
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", g.CreateZalopayPaymentLinkURL, bytes.NewBuffer(jsonData))
 	if err != nil {
@@ -120,13 +108,19 @@ func (g *ZalopayGateway) ProcessPayment(ctx context.Context, req *payment.Proces
 	}
 	defer resp.Body.Close()
 
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+	log.Printf("zalopay response body: %s\n", string(bodyBytes))
+
 	type zaloPayResponse struct {
 		ReturnCode int    `json:"return_code"`
 		OrderURL   string `json:"order_url"`
 	}
 
 	var zaloResp zaloPayResponse
-	if err := json.NewDecoder(resp.Body).Decode(&zaloResp); err != nil {
+	if err := json.Unmarshal(bodyBytes, &zaloResp); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
@@ -134,9 +128,9 @@ func (g *ZalopayGateway) ProcessPayment(ctx context.Context, req *payment.Proces
 		return nil, fmt.Errorf("zalopay error: return_code=%d", zaloResp.ReturnCode)
 	}
 
-	return &payment.ProcessBankTransferPaymentResponse{
+	return &payment.ProcessPaymentResponse{
 		PaymentUrl: zaloResp.OrderURL,
-		Payment: &payment.BankTransferPaymentData{
+		Payment: &payment.PaymentData{
 			Id:              data.AppTransID,
 			OrderCode:       req.OrderCode,
 			Amount:          float64(data.Amount),
@@ -177,7 +171,7 @@ func (g *ZalopayGateway) HandleCallback(ctx context.Context, callbackData interf
 	return transData.AppTransID, nil
 }
 
-func (g *ZalopayGateway) CancelPayment(ctx context.Context, req *payment.CancelBankTransferPaymentRequest) (*emptypb.Empty, error) {
+func (g *ZalopayGateway) CancelPayment(ctx context.Context, req *payment.CancelPaymentRequest) (*emptypb.Empty, error) {
 	return &emptypb.Empty{}, nil
 }
 

@@ -35,7 +35,7 @@ type embedData struct {
 }
 
 type ZaloPayRequestConfig struct {
-	AppID              string `json:"app_id"`
+	AppID              int    `json:"app_id"`
 	AppUser            string `json:"app_user"`
 	AppTime            int64  `json:"app_time"`
 	Amount             int64  `json:"amount"`

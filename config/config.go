@@ -8,11 +8,11 @@ import (
 )
 
 type Config struct {
-	Log            LogConfig
-	PaymentGateway PaymentGatewayConfig
-	Grpc           GrpcMicroserviceConfig
-	Http           HttpConfig
-	Temporal       TemporalConfig
+	Log        LogConfig
+	PayGateway PaymentGatewayConfig
+	Grpc       GrpcMicroserviceConfig
+	Http       HttpConfig
+	Temporal   TemporalConfig
 }
 
 type LogConfig struct {

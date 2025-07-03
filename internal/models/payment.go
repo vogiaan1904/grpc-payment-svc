@@ -9,26 +9,23 @@ import (
 type PaymentStatus string
 
 const (
-	PaymentStatusPending   PaymentStatus = "PENDING"
-	PaymentStatusCompleted PaymentStatus = "COMPLETED"
-	PaymentStatusFailed    PaymentStatus = "FAILED"
-	PaymentStatusCancelled PaymentStatus = "CANCELLED"
-	PaymentStatusRefunded  PaymentStatus = "REFUNDED"
+	PaymentStatusPending   PaymentStatus = "pending"
+	PaymentStatusCompleted PaymentStatus = "completed"
+	PaymentStatusFailed    PaymentStatus = "failed"
+	PaymentStatusCancelled PaymentStatus = "cancelled"
+	PaymentStatusRefunded  PaymentStatus = "refunded"
 )
 
 type PaymentMethod string
 
 const (
-	PaymentMethodCreditCard   PaymentMethod = "CREDIT_CARD"
-	PaymentMethodPaypal       PaymentMethod = "PAYPAL"
-	PaymentMethodBankTransfer PaymentMethod = "BANK_TRANSFER"
-	PaymentMethodCrypto       PaymentMethod = "CRYPTO"
+	PaymentMethodBankTransfer PaymentMethod = "bank_transfer"
 )
 
 type GatewayType string
 
 const (
-	GatewayTypeZalopay GatewayType = "ZALOPAY"
+	GatewayTypeZalopay GatewayType = "zalopay"
 )
 
 type Payment struct {

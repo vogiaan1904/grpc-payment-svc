@@ -1,0 +1,52 @@
+# Binaries and build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+grpc-server
+http-server
+payment-grpc-server
+payment-http-server
+build/
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files
+docker-compose*.yml
+Dockerfile*
+
+# Git files (except .gitmodules needed for submodules)
+.git/
+!.gitmodules
+
+# Documentation
+README.md
+*.md
+
+# Logs
+*.log
+
+# Temporal specific
+.temporal/
+
+# Scripts (if not needed in container)
+scripts/ 

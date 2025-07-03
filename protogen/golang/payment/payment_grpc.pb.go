@@ -20,16 +20,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PaymentService_ProcessBankTransferPayment_FullMethodName = "/payment.PaymentService/ProcessBankTransferPayment"
-	PaymentService_CancelBankTransferPayment_FullMethodName  = "/payment.PaymentService/CancelBankTransferPayment"
+	PaymentService_ProcessPayment_FullMethodName = "/payment.PaymentService/ProcessPayment"
+	PaymentService_CancelPayment_FullMethodName  = "/payment.PaymentService/CancelPayment"
 )
 
 // PaymentServiceClient is the client API for PaymentService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PaymentServiceClient interface {
-	ProcessBankTransferPayment(ctx context.Context, in *ProcessBankTransferPaymentRequest, opts ...grpc.CallOption) (*ProcessBankTransferPaymentResponse, error)
-	CancelBankTransferPayment(ctx context.Context, in *CancelBankTransferPaymentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ProcessPayment(ctx context.Context, in *ProcessPaymentRequest, opts ...grpc.CallOption) (*ProcessPaymentResponse, error)
+	CancelPayment(ctx context.Context, in *CancelPaymentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type paymentServiceClient struct {
@@ -40,20 +40,20 @@ func NewPaymentServiceClient(cc grpc.ClientConnInterface) PaymentServiceClient {
 	return &paymentServiceClient{cc}
 }
 
-func (c *paymentServiceClient) ProcessBankTransferPayment(ctx context.Context, in *ProcessBankTransferPaymentRequest, opts ...grpc.CallOption) (*ProcessBankTransferPaymentResponse, error) {
+func (c *paymentServiceClient) ProcessPayment(ctx context.Context, in *ProcessPaymentRequest, opts ...grpc.CallOption) (*ProcessPaymentResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ProcessBankTransferPaymentResponse)
-	err := c.cc.Invoke(ctx, PaymentService_ProcessBankTransferPayment_FullMethodName, in, out, cOpts...)
+	out := new(ProcessPaymentResponse)
+	err := c.cc.Invoke(ctx, PaymentService_ProcessPayment_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *paymentServiceClient) CancelBankTransferPayment(ctx context.Context, in *CancelBankTransferPaymentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *paymentServiceClient) CancelPayment(ctx context.Context, in *CancelPaymentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, PaymentService_CancelBankTransferPayment_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, PaymentService_CancelPayment_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,8 +64,8 @@ func (c *paymentServiceClient) CancelBankTransferPayment(ctx context.Context, in
 // All implementations must embed UnimplementedPaymentServiceServer
 // for forward compatibility.
 type PaymentServiceServer interface {
-	ProcessBankTransferPayment(context.Context, *ProcessBankTransferPaymentRequest) (*ProcessBankTransferPaymentResponse, error)
-	CancelBankTransferPayment(context.Context, *CancelBankTransferPaymentRequest) (*emptypb.Empty, error)
+	ProcessPayment(context.Context, *ProcessPaymentRequest) (*ProcessPaymentResponse, error)
+	CancelPayment(context.Context, *CancelPaymentRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPaymentServiceServer()
 }
 
@@ -76,11 +76,11 @@ type PaymentServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPaymentServiceServer struct{}
 
-func (UnimplementedPaymentServiceServer) ProcessBankTransferPayment(context.Context, *ProcessBankTransferPaymentRequest) (*ProcessBankTransferPaymentResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ProcessBankTransferPayment not implemented")
+func (UnimplementedPaymentServiceServer) ProcessPayment(context.Context, *ProcessPaymentRequest) (*ProcessPaymentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProcessPayment not implemented")
 }
-func (UnimplementedPaymentServiceServer) CancelBankTransferPayment(context.Context, *CancelBankTransferPaymentRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CancelBankTransferPayment not implemented")
+func (UnimplementedPaymentServiceServer) CancelPayment(context.Context, *CancelPaymentRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelPayment not implemented")
 }
 func (UnimplementedPaymentServiceServer) mustEmbedUnimplementedPaymentServiceServer() {}
 func (UnimplementedPaymentServiceServer) testEmbeddedByValue()                        {}
@@ -103,38 +103,38 @@ func RegisterPaymentServiceServer(s grpc.ServiceRegistrar, srv PaymentServiceSer
 	s.RegisterService(&PaymentService_ServiceDesc, srv)
 }
 
-func _PaymentService_ProcessBankTransferPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProcessBankTransferPaymentRequest)
+func _PaymentService_ProcessPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProcessPaymentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PaymentServiceServer).ProcessBankTransferPayment(ctx, in)
+		return srv.(PaymentServiceServer).ProcessPayment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PaymentService_ProcessBankTransferPayment_FullMethodName,
+		FullMethod: PaymentService_ProcessPayment_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PaymentServiceServer).ProcessBankTransferPayment(ctx, req.(*ProcessBankTransferPaymentRequest))
+		return srv.(PaymentServiceServer).ProcessPayment(ctx, req.(*ProcessPaymentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PaymentService_CancelBankTransferPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CancelBankTransferPaymentRequest)
+func _PaymentService_CancelPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CancelPaymentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PaymentServiceServer).CancelBankTransferPayment(ctx, in)
+		return srv.(PaymentServiceServer).CancelPayment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PaymentService_CancelBankTransferPayment_FullMethodName,
+		FullMethod: PaymentService_CancelPayment_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PaymentServiceServer).CancelBankTransferPayment(ctx, req.(*CancelBankTransferPaymentRequest))
+		return srv.(PaymentServiceServer).CancelPayment(ctx, req.(*CancelPaymentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -147,12 +147,12 @@ var PaymentService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*PaymentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ProcessBankTransferPayment",
-			Handler:    _PaymentService_ProcessBankTransferPayment_Handler,
+			MethodName: "ProcessPayment",
+			Handler:    _PaymentService_ProcessPayment_Handler,
 		},
 		{
-			MethodName: "CancelBankTransferPayment",
-			Handler:    _PaymentService_CancelBankTransferPayment_Handler,
+			MethodName: "CancelPayment",
+			Handler:    _PaymentService_CancelPayment_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

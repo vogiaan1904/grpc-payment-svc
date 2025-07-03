@@ -14,45 +14,43 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-const PostPaymentOrderTaskQueue = "POST_PAYMENT_ORDER_TASK_QUEUE"
-
 type implPaymentService struct {
-	l              log.Logger
-	gatewayFactory *PaymentGatewayFactory
-	orderSvc       order.OrderServiceClient
-	temporalClient client.Client
+	l        log.Logger
+	gwf      *GatewayFactory
+	orderSvc order.OrderServiceClient
+	temporal client.Client
 	payment.UnimplementedPaymentServiceServer
 }
 
-func NewPaymentService(l log.Logger, factory *PaymentGatewayFactory, orderSvc order.OrderServiceClient, tCli client.Client) payment.PaymentServiceServer {
+func NewPaymentService(l log.Logger, gwf *GatewayFactory, orderSvc order.OrderServiceClient, temporal client.Client) payment.PaymentServiceServer {
 	return &implPaymentService{
-		l:              l,
-		gatewayFactory: factory,
-		orderSvc:       orderSvc,
-		temporalClient: tCli,
+		l:        l,
+		gwf:      gwf,
+		orderSvc: orderSvc,
+		temporal: temporal,
 	}
 }
 
-func (svc *implPaymentService) ProcessBankTransferPayment(ctx context.Context, req *payment.ProcessBankTransferPaymentRequest) (*payment.ProcessBankTransferPaymentResponse, error) {
+func (svc *implPaymentService) ProcessPayment(ctx context.Context, req *payment.ProcessPaymentRequest) (*payment.ProcessPaymentResponse, error) {
 	res, err := svc.orderSvc.FindOne(ctx, &order.FindOneRequest{Request: &order.FindOneRequest_Code{Code: req.OrderCode}})
 	if err != nil {
-		svc.l.Errorf(ctx, "failed to find order: %v", err)
+		svc.l.Warnf(ctx, "failed to find order: %v", err)
 		return nil, status.Error(codes.Internal, ErrInternal.Error())
 	}
 
 	if res == nil || res.Order == nil {
-		svc.l.Errorf(ctx, "order not found: %v", ErrOrderNotFound)
+		svc.l.Warnf(ctx, "order not found: %v", ErrOrderNotFound)
 		return nil, status.Error(codes.NotFound, ErrOrderNotFound.Error())
 	}
 
 	if res.Order.Status != order.OrderStatus_PAYMENT_PENDING {
-		svc.l.Errorf(ctx, "order status validation failed: %v", ErrOrderNotPending)
+		svc.l.Warnf(ctx, "order status validation failed: %v", ErrOrderNotPending)
 		return nil, status.Error(codes.FailedPrecondition, ErrOrderNotPending.Error())
 	}
 
-	gw, err := svc.gatewayFactory.GetGateway(models.GatewayType(req.Provider))
+	gw, err := svc.gwf.GetGateway(models.GatewayType(req.Provider))
 	if err != nil {
-		svc.l.Errorf(ctx, "failed to get payment gateway: %v", err)
+		svc.l.Warnf(ctx, "failed to get payment gateway: %v", err)
 		return nil, status.Error(codes.InvalidArgument, ErrInvalidGateway.Error())
 	}
 
@@ -65,14 +63,14 @@ func (svc *implPaymentService) ProcessBankTransferPayment(ctx context.Context, r
 	return pRes, nil
 }
 
-func (svc *implPaymentService) CancelBankTransferPayment(ctx context.Context, req *payment.CancelBankTransferPaymentRequest) (*emptypb.Empty, error) {
+func (svc *implPaymentService) CancelPayment(ctx context.Context, req *payment.CancelPaymentRequest) (*emptypb.Empty, error) {
 	resp, err := svc.orderSvc.FindOne(ctx, &order.FindOneRequest{Request: &order.FindOneRequest_Code{Code: req.GetOrderCode()}})
 	if err != nil {
 		svc.l.Errorf(ctx, "failed to find order: %v", err)
 		return nil, status.Errorf(codes.Internal, "error retrieving order: %v", err)
 	}
 
-	gw, err := svc.gatewayFactory.GetGateway(models.GatewayType(resp.Order.Provider))
+	gw, err := svc.gwf.GetGateway(models.GatewayType(resp.Order.Provider))
 	if err != nil {
 		svc.l.Errorf(ctx, "failed to get payment gateway: %v", err)
 		return nil, status.Errorf(codes.InvalidArgument, "invalid gateway: %v", err)
@@ -88,7 +86,7 @@ func (svc *implPaymentService) CancelBankTransferPayment(ctx context.Context, re
 }
 
 func (svc *implPaymentService) HandleCallback(ctx context.Context, data interface{}, gatewayType models.GatewayType) error {
-	gw, err := svc.gatewayFactory.GetGateway(gatewayType)
+	gw, err := svc.gwf.GetGateway(gatewayType)
 	if err != nil {
 		svc.l.Errorf(ctx, "failed to get payment gateway: %v", err)
 		return status.Errorf(codes.InvalidArgument, "invalid gateway: %v", err)
@@ -107,20 +105,20 @@ func (svc *implPaymentService) HandleCallback(ctx context.Context, data interfac
 
 	wfOpts := client.StartWorkflowOptions{
 		ID:                       wfID,
-		TaskQueue:                PostPaymentOrderTaskQueue,
+		TaskQueue:                TaskQueueName,
 		WorkflowExecutionTimeout: time.Hour * 24,
 		WorkflowRunTimeout:       time.Hour * 24,
 		WorkflowTaskTimeout:      time.Minute * 1,
 	}
 
-	svc.l.Infof(ctx, "Starting OrderProcessingWorkflow with ID: %s", wfID)
-	we, err := svc.temporalClient.ExecuteWorkflow(ctx, wfOpts, "ProcessPostPaymentOrder", wfParams)
+	svc.l.Infof(ctx, "Starting workflow with ID: %s", wfID)
+	we, err := svc.temporal.ExecuteWorkflow(ctx, wfOpts, WorkflowName, wfParams)
 	if err != nil {
-		svc.l.Errorf(ctx, "Failed to start OrderProcessingWorkflow: %v", err)
+		svc.l.Errorf(ctx, "Failed to start workflow: %v", err)
 		return status.Errorf(codes.Internal, "failed to initiate order processing: %v", err)
 	}
 
-	svc.l.Infof(ctx, "OrderProcessingWorkflow started successfully. WorkflowID: %s, RunID: %s", we.GetID(), we.GetRunID())
+	svc.l.Infof(ctx, "Workflow started successfully. WorkflowID: %s, RunID: %s", we.GetID(), we.GetRunID())
 	return nil
 }
 

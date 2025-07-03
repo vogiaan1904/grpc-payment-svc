@@ -22,7 +22,8 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type BankTransferPaymentData struct {
+// Bank transfer method
+type PaymentData struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	OrderCode       string                 `protobuf:"bytes,2,opt,name=order_code,json=orderCode,proto3" json:"order_code,omitempty"`
@@ -35,20 +36,20 @@ type BankTransferPaymentData struct {
 	sizeCache       protoimpl.SizeCache
 }
 
-func (x *BankTransferPaymentData) Reset() {
-	*x = BankTransferPaymentData{}
+func (x *PaymentData) Reset() {
+	*x = PaymentData{}
 	mi := &file_payment_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *BankTransferPaymentData) String() string {
+func (x *PaymentData) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*BankTransferPaymentData) ProtoMessage() {}
+func (*PaymentData) ProtoMessage() {}
 
-func (x *BankTransferPaymentData) ProtoReflect() protoreflect.Message {
+func (x *PaymentData) ProtoReflect() protoreflect.Message {
 	mi := &file_payment_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -60,62 +61,61 @@ func (x *BankTransferPaymentData) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use BankTransferPaymentData.ProtoReflect.Descriptor instead.
-func (*BankTransferPaymentData) Descriptor() ([]byte, []int) {
+// Deprecated: Use PaymentData.ProtoReflect.Descriptor instead.
+func (*PaymentData) Descriptor() ([]byte, []int) {
 	return file_payment_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *BankTransferPaymentData) GetId() string {
+func (x *PaymentData) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-func (x *BankTransferPaymentData) GetOrderCode() string {
+func (x *PaymentData) GetOrderCode() string {
 	if x != nil {
 		return x.OrderCode
 	}
 	return ""
 }
 
-func (x *BankTransferPaymentData) GetUserId() string {
+func (x *PaymentData) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-func (x *BankTransferPaymentData) GetAmount() float64 {
+func (x *PaymentData) GetAmount() float64 {
 	if x != nil {
 		return x.Amount
 	}
 	return 0
 }
 
-func (x *BankTransferPaymentData) GetProvider() string {
+func (x *PaymentData) GetProvider() string {
 	if x != nil {
 		return x.Provider
 	}
 	return ""
 }
 
-func (x *BankTransferPaymentData) GetProviderDetails() string {
+func (x *PaymentData) GetProviderDetails() string {
 	if x != nil {
 		return x.ProviderDetails
 	}
 	return ""
 }
 
-func (x *BankTransferPaymentData) GetMetadata() map[string]string {
+func (x *PaymentData) GetMetadata() map[string]string {
 	if x != nil {
 		return x.Metadata
 	}
 	return nil
 }
 
-// Process Payment
-type ProcessBankTransferPaymentRequest struct {
+type ProcessPaymentRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	OrderCode       string                 `protobuf:"bytes,1,opt,name=order_code,json=orderCode,proto3" json:"order_code,omitempty"`
 	UserId          string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -127,20 +127,20 @@ type ProcessBankTransferPaymentRequest struct {
 	sizeCache       protoimpl.SizeCache
 }
 
-func (x *ProcessBankTransferPaymentRequest) Reset() {
-	*x = ProcessBankTransferPaymentRequest{}
+func (x *ProcessPaymentRequest) Reset() {
+	*x = ProcessPaymentRequest{}
 	mi := &file_payment_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ProcessBankTransferPaymentRequest) String() string {
+func (x *ProcessPaymentRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ProcessBankTransferPaymentRequest) ProtoMessage() {}
+func (*ProcessPaymentRequest) ProtoMessage() {}
 
-func (x *ProcessBankTransferPaymentRequest) ProtoReflect() protoreflect.Message {
+func (x *ProcessPaymentRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_payment_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -152,75 +152,75 @@ func (x *ProcessBankTransferPaymentRequest) ProtoReflect() protoreflect.Message 
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ProcessBankTransferPaymentRequest.ProtoReflect.Descriptor instead.
-func (*ProcessBankTransferPaymentRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProcessPaymentRequest.ProtoReflect.Descriptor instead.
+func (*ProcessPaymentRequest) Descriptor() ([]byte, []int) {
 	return file_payment_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ProcessBankTransferPaymentRequest) GetOrderCode() string {
+func (x *ProcessPaymentRequest) GetOrderCode() string {
 	if x != nil {
 		return x.OrderCode
 	}
 	return ""
 }
 
-func (x *ProcessBankTransferPaymentRequest) GetUserId() string {
+func (x *ProcessPaymentRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-func (x *ProcessBankTransferPaymentRequest) GetAmount() float64 {
+func (x *ProcessPaymentRequest) GetAmount() float64 {
 	if x != nil {
 		return x.Amount
 	}
 	return 0
 }
 
-func (x *ProcessBankTransferPaymentRequest) GetProvider() string {
+func (x *ProcessPaymentRequest) GetProvider() string {
 	if x != nil {
 		return x.Provider
 	}
 	return ""
 }
 
-func (x *ProcessBankTransferPaymentRequest) GetProviderDetails() string {
+func (x *ProcessPaymentRequest) GetProviderDetails() string {
 	if x != nil {
 		return x.ProviderDetails
 	}
 	return ""
 }
 
-func (x *ProcessBankTransferPaymentRequest) GetMetadata() map[string]string {
+func (x *ProcessPaymentRequest) GetMetadata() map[string]string {
 	if x != nil {
 		return x.Metadata
 	}
 	return nil
 }
 
-type ProcessBankTransferPaymentResponse struct {
-	state         protoimpl.MessageState   `protogen:"open.v1"`
-	Payment       *BankTransferPaymentData `protobuf:"bytes,1,opt,name=payment,proto3" json:"payment,omitempty"`
-	PaymentUrl    string                   `protobuf:"bytes,2,opt,name=payment_url,json=paymentUrl,proto3" json:"payment_url,omitempty"`
+type ProcessPaymentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payment       *PaymentData           `protobuf:"bytes,1,opt,name=payment,proto3" json:"payment,omitempty"`
+	PaymentUrl    string                 `protobuf:"bytes,2,opt,name=payment_url,json=paymentUrl,proto3" json:"payment_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ProcessBankTransferPaymentResponse) Reset() {
-	*x = ProcessBankTransferPaymentResponse{}
+func (x *ProcessPaymentResponse) Reset() {
+	*x = ProcessPaymentResponse{}
 	mi := &file_payment_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ProcessBankTransferPaymentResponse) String() string {
+func (x *ProcessPaymentResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ProcessBankTransferPaymentResponse) ProtoMessage() {}
+func (*ProcessPaymentResponse) ProtoMessage() {}
 
-func (x *ProcessBankTransferPaymentResponse) ProtoReflect() protoreflect.Message {
+func (x *ProcessPaymentResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_payment_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -232,52 +232,51 @@ func (x *ProcessBankTransferPaymentResponse) ProtoReflect() protoreflect.Message
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ProcessBankTransferPaymentResponse.ProtoReflect.Descriptor instead.
-func (*ProcessBankTransferPaymentResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProcessPaymentResponse.ProtoReflect.Descriptor instead.
+func (*ProcessPaymentResponse) Descriptor() ([]byte, []int) {
 	return file_payment_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ProcessBankTransferPaymentResponse) GetPayment() *BankTransferPaymentData {
+func (x *ProcessPaymentResponse) GetPayment() *PaymentData {
 	if x != nil {
 		return x.Payment
 	}
 	return nil
 }
 
-func (x *ProcessBankTransferPaymentResponse) GetPaymentUrl() string {
+func (x *ProcessPaymentResponse) GetPaymentUrl() string {
 	if x != nil {
 		return x.PaymentUrl
 	}
 	return ""
 }
 
-// Cancel Payment
-type CancelBankTransferPaymentRequest struct {
+type CancelPaymentRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Types that are valid to be assigned to PaymentIdentifier:
 	//
-	//	*CancelBankTransferPaymentRequest_PaymentId
-	//	*CancelBankTransferPaymentRequest_OrderCode
-	PaymentIdentifier isCancelBankTransferPaymentRequest_PaymentIdentifier `protobuf_oneof:"payment_identifier"`
-	Reason            string                                               `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	//	*CancelPaymentRequest_PaymentId
+	//	*CancelPaymentRequest_OrderCode
+	PaymentIdentifier isCancelPaymentRequest_PaymentIdentifier `protobuf_oneof:"payment_identifier"`
+	Reason            string                                   `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
 
-func (x *CancelBankTransferPaymentRequest) Reset() {
-	*x = CancelBankTransferPaymentRequest{}
+func (x *CancelPaymentRequest) Reset() {
+	*x = CancelPaymentRequest{}
 	mi := &file_payment_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CancelBankTransferPaymentRequest) String() string {
+func (x *CancelPaymentRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CancelBankTransferPaymentRequest) ProtoMessage() {}
+func (*CancelPaymentRequest) ProtoMessage() {}
 
-func (x *CancelBankTransferPaymentRequest) ProtoReflect() protoreflect.Message {
+func (x *CancelPaymentRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_payment_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -289,103 +288,101 @@ func (x *CancelBankTransferPaymentRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CancelBankTransferPaymentRequest.ProtoReflect.Descriptor instead.
-func (*CancelBankTransferPaymentRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CancelPaymentRequest.ProtoReflect.Descriptor instead.
+func (*CancelPaymentRequest) Descriptor() ([]byte, []int) {
 	return file_payment_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CancelBankTransferPaymentRequest) GetPaymentIdentifier() isCancelBankTransferPaymentRequest_PaymentIdentifier {
+func (x *CancelPaymentRequest) GetPaymentIdentifier() isCancelPaymentRequest_PaymentIdentifier {
 	if x != nil {
 		return x.PaymentIdentifier
 	}
 	return nil
 }
 
-func (x *CancelBankTransferPaymentRequest) GetPaymentId() string {
+func (x *CancelPaymentRequest) GetPaymentId() string {
 	if x != nil {
-		if x, ok := x.PaymentIdentifier.(*CancelBankTransferPaymentRequest_PaymentId); ok {
+		if x, ok := x.PaymentIdentifier.(*CancelPaymentRequest_PaymentId); ok {
 			return x.PaymentId
 		}
 	}
 	return ""
 }
 
-func (x *CancelBankTransferPaymentRequest) GetOrderCode() string {
+func (x *CancelPaymentRequest) GetOrderCode() string {
 	if x != nil {
-		if x, ok := x.PaymentIdentifier.(*CancelBankTransferPaymentRequest_OrderCode); ok {
+		if x, ok := x.PaymentIdentifier.(*CancelPaymentRequest_OrderCode); ok {
 			return x.OrderCode
 		}
 	}
 	return ""
 }
 
-func (x *CancelBankTransferPaymentRequest) GetReason() string {
+func (x *CancelPaymentRequest) GetReason() string {
 	if x != nil {
 		return x.Reason
 	}
 	return ""
 }
 
-type isCancelBankTransferPaymentRequest_PaymentIdentifier interface {
-	isCancelBankTransferPaymentRequest_PaymentIdentifier()
+type isCancelPaymentRequest_PaymentIdentifier interface {
+	isCancelPaymentRequest_PaymentIdentifier()
 }
 
-type CancelBankTransferPaymentRequest_PaymentId struct {
+type CancelPaymentRequest_PaymentId struct {
 	PaymentId string `protobuf:"bytes,1,opt,name=payment_id,json=paymentId,proto3,oneof"`
 }
 
-type CancelBankTransferPaymentRequest_OrderCode struct {
+type CancelPaymentRequest_OrderCode struct {
 	OrderCode string `protobuf:"bytes,2,opt,name=order_code,json=orderCode,proto3,oneof"`
 }
 
-func (*CancelBankTransferPaymentRequest_PaymentId) isCancelBankTransferPaymentRequest_PaymentIdentifier() {
-}
+func (*CancelPaymentRequest_PaymentId) isCancelPaymentRequest_PaymentIdentifier() {}
 
-func (*CancelBankTransferPaymentRequest_OrderCode) isCancelBankTransferPaymentRequest_PaymentIdentifier() {
-}
+func (*CancelPaymentRequest_OrderCode) isCancelPaymentRequest_PaymentIdentifier() {}
 
 var File_payment_proto protoreflect.FileDescriptor
 
 const file_payment_proto_rawDesc = "" +
 	"\n" +
-	"\rpayment.proto\x12\apayment\x1a\x1bgoogle/protobuf/empty.proto\"\xc9\x02\n" +
-	"\x17BankTransferPaymentData\x12\x0e\n" +
+	"\rpayment.proto\x12\apayment\x1a\x1bgoogle/protobuf/empty.proto\"\xb1\x02\n" +
+	"\vPaymentData\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
 	"order_code\x18\x02 \x01(\tR\torderCode\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06amount\x18\x04 \x01(\x01R\x06amount\x12\x1a\n" +
 	"\bprovider\x18\x05 \x01(\tR\bprovider\x12)\n" +
-	"\x10provider_details\x18\x06 \x01(\tR\x0fproviderDetails\x12J\n" +
-	"\bmetadata\x18\a \x03(\v2..payment.BankTransferPaymentData.MetadataEntryR\bmetadata\x1a;\n" +
+	"\x10provider_details\x18\x06 \x01(\tR\x0fproviderDetails\x12>\n" +
+	"\bmetadata\x18\a \x03(\v2\".payment.PaymentData.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xcd\x02\n" +
-	"!ProcessBankTransferPaymentRequest\x12\x1d\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xb5\x02\n" +
+	"\x15ProcessPaymentRequest\x12\x1d\n" +
 	"\n" +
 	"order_code\x18\x01 \x01(\tR\torderCode\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06amount\x18\x03 \x01(\x01R\x06amount\x12\x1a\n" +
 	"\bprovider\x18\x04 \x01(\tR\bprovider\x12)\n" +
-	"\x10provider_details\x18\x05 \x01(\tR\x0fproviderDetails\x12T\n" +
-	"\bmetadata\x18\x06 \x03(\v28.payment.ProcessBankTransferPaymentRequest.MetadataEntryR\bmetadata\x1a;\n" +
+	"\x10provider_details\x18\x05 \x01(\tR\x0fproviderDetails\x12H\n" +
+	"\bmetadata\x18\x06 \x03(\v2,.payment.ProcessPaymentRequest.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x81\x01\n" +
-	"\"ProcessBankTransferPaymentResponse\x12:\n" +
-	"\apayment\x18\x01 \x01(\v2 .payment.BankTransferPaymentDataR\apayment\x12\x1f\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"i\n" +
+	"\x16ProcessPaymentResponse\x12.\n" +
+	"\apayment\x18\x01 \x01(\v2\x14.payment.PaymentDataR\apayment\x12\x1f\n" +
 	"\vpayment_url\x18\x02 \x01(\tR\n" +
-	"paymentUrl\"\x92\x01\n" +
-	" CancelBankTransferPaymentRequest\x12\x1f\n" +
+	"paymentUrl\"\x86\x01\n" +
+	"\x14CancelPaymentRequest\x12\x1f\n" +
 	"\n" +
 	"payment_id\x18\x01 \x01(\tH\x00R\tpaymentId\x12\x1f\n" +
 	"\n" +
 	"order_code\x18\x02 \x01(\tH\x00R\torderCode\x12\x16\n" +
 	"\x06reason\x18\x03 \x01(\tR\x06reasonB\x14\n" +
-	"\x12payment_identifier2\xeb\x01\n" +
-	"\x0ePaymentService\x12w\n" +
-	"\x1aProcessBankTransferPayment\x12*.payment.ProcessBankTransferPaymentRequest\x1a+.payment.ProcessBankTransferPaymentResponse\"\x00\x12`\n" +
-	"\x19CancelBankTransferPayment\x12).payment.CancelBankTransferPaymentRequest\x1a\x16.google.protobuf.Empty\"\x00BKZIgithub.com/vogiaan1904/e-commerce-grpc-nest-proto/protogen/golang/paymentb\x06proto3"
+	"\x12payment_identifier2\xaf\x01\n" +
+	"\x0ePaymentService\x12S\n" +
+	"\x0eProcessPayment\x12\x1e.payment.ProcessPaymentRequest\x1a\x1f.payment.ProcessPaymentResponse\"\x00\x12H\n" +
+	"\rCancelPayment\x12\x1d.payment.CancelPaymentRequest\x1a\x16.google.protobuf.Empty\"\x00BKZIgithub.com/vogiaan1904/e-commerce-grpc-nest-proto/protogen/golang/paymentb\x06proto3"
 
 var (
 	file_payment_proto_rawDescOnce sync.Once
@@ -401,22 +398,22 @@ func file_payment_proto_rawDescGZIP() []byte {
 
 var file_payment_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_payment_proto_goTypes = []any{
-	(*BankTransferPaymentData)(nil),            // 0: payment.BankTransferPaymentData
-	(*ProcessBankTransferPaymentRequest)(nil),  // 1: payment.ProcessBankTransferPaymentRequest
-	(*ProcessBankTransferPaymentResponse)(nil), // 2: payment.ProcessBankTransferPaymentResponse
-	(*CancelBankTransferPaymentRequest)(nil),   // 3: payment.CancelBankTransferPaymentRequest
-	nil,                                        // 4: payment.BankTransferPaymentData.MetadataEntry
-	nil,                                        // 5: payment.ProcessBankTransferPaymentRequest.MetadataEntry
-	(*emptypb.Empty)(nil),                      // 6: google.protobuf.Empty
+	(*PaymentData)(nil),            // 0: payment.PaymentData
+	(*ProcessPaymentRequest)(nil),  // 1: payment.ProcessPaymentRequest
+	(*ProcessPaymentResponse)(nil), // 2: payment.ProcessPaymentResponse
+	(*CancelPaymentRequest)(nil),   // 3: payment.CancelPaymentRequest
+	nil,                            // 4: payment.PaymentData.MetadataEntry
+	nil,                            // 5: payment.ProcessPaymentRequest.MetadataEntry
+	(*emptypb.Empty)(nil),          // 6: google.protobuf.Empty
 }
 var file_payment_proto_depIdxs = []int32{
-	4, // 0: payment.BankTransferPaymentData.metadata:type_name -> payment.BankTransferPaymentData.MetadataEntry
-	5, // 1: payment.ProcessBankTransferPaymentRequest.metadata:type_name -> payment.ProcessBankTransferPaymentRequest.MetadataEntry
-	0, // 2: payment.ProcessBankTransferPaymentResponse.payment:type_name -> payment.BankTransferPaymentData
-	1, // 3: payment.PaymentService.ProcessBankTransferPayment:input_type -> payment.ProcessBankTransferPaymentRequest
-	3, // 4: payment.PaymentService.CancelBankTransferPayment:input_type -> payment.CancelBankTransferPaymentRequest
-	2, // 5: payment.PaymentService.ProcessBankTransferPayment:output_type -> payment.ProcessBankTransferPaymentResponse
-	6, // 6: payment.PaymentService.CancelBankTransferPayment:output_type -> google.protobuf.Empty
+	4, // 0: payment.PaymentData.metadata:type_name -> payment.PaymentData.MetadataEntry
+	5, // 1: payment.ProcessPaymentRequest.metadata:type_name -> payment.ProcessPaymentRequest.MetadataEntry
+	0, // 2: payment.ProcessPaymentResponse.payment:type_name -> payment.PaymentData
+	1, // 3: payment.PaymentService.ProcessPayment:input_type -> payment.ProcessPaymentRequest
+	3, // 4: payment.PaymentService.CancelPayment:input_type -> payment.CancelPaymentRequest
+	2, // 5: payment.PaymentService.ProcessPayment:output_type -> payment.ProcessPaymentResponse
+	6, // 6: payment.PaymentService.CancelPayment:output_type -> google.protobuf.Empty
 	5, // [5:7] is the sub-list for method output_type
 	3, // [3:5] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
@@ -430,8 +427,8 @@ func file_payment_proto_init() {
 		return
 	}
 	file_payment_proto_msgTypes[3].OneofWrappers = []any{
-		(*CancelBankTransferPaymentRequest_PaymentId)(nil),
-		(*CancelBankTransferPaymentRequest_OrderCode)(nil),
+		(*CancelPaymentRequest_PaymentId)(nil),
+		(*CancelPaymentRequest_OrderCode)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

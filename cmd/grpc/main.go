@@ -61,7 +61,7 @@ func main() {
 	)
 
 	// Payment gateways
-	zpGW := zpGW.NewZalopayGateway(cfg.PaymentGateway.Zalopay.AppID, cfg.PaymentGateway.Zalopay.Key1, cfg.PaymentGateway.Zalopay.Key2, cfg.PaymentGateway.Zalopay.Host)
+	zpGW := zpGW.New(cfg.PayGateway.Zalopay.AppID, cfg.PayGateway.Zalopay.Key1, cfg.PayGateway.Zalopay.Key2, cfg.PayGateway.Zalopay.Host)
 
 	gwf := bankTf.NewPaymentGatewayFactory()
 	gwf.RegisterGateway(models.GatewayTypeZalopay, zpGW)

@@ -7,8 +7,8 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type PaymentGatewayInterface interface {
-	ProcessPayment(ctx context.Context, req *payment.ProcessBankTransferPaymentRequest) (*payment.ProcessBankTransferPaymentResponse, error)
+type PaymentGateway interface {
+	ProcessPayment(ctx context.Context, req *payment.ProcessPaymentRequest) (*payment.ProcessPaymentResponse, error)
 	HandleCallback(ctx context.Context, data interface{}) (string, error)
-	CancelPayment(ctx context.Context, req *payment.CancelBankTransferPaymentRequest) (*emptypb.Empty, error)
+	CancelPayment(ctx context.Context, req *payment.CancelPaymentRequest) (*emptypb.Empty, error)
 }
